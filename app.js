@@ -78,7 +78,7 @@ const clean = (html) => DOMPurify.sanitize(html, { ADD_ATTR: ["target"] });
 const inline = (md) => clean(marked.parseInline(md));
 const chapterByFile = (f) => cfg.chapters.find((c) => c.file.toLowerCase() === f.toLowerCase());
 
-function renderMarkdown(md, { dropH1 = true } = {}) {
+function renderMarkdown(md, { dropH1 = true, sectioned = false, openFirst = 2 } = {}) {
   const box = document.createElement("div");
   box.className = "prose";
   box.innerHTML = clean(marked.parse(md));
@@ -112,6 +112,35 @@ function renderMarkdown(md, { dropH1 = true } = {}) {
   };
   $$("li, p", box).forEach(tone);
   $$("blockquote", box).forEach((b) => b.classList.add("callout"));
+  if (sectioned) {
+    // each H2 becomes a collapsible card: less wall-of-text, one tap to open
+    const kids = [...box.childNodes];
+    const out = document.createDocumentFragment();
+    let cur = null, n = 0;
+    kids.forEach((k) => {
+      if (k.nodeType === 1 && k.tagName === "H2") {
+        cur = document.createElement("details"); cur.className = "sect"; if (n++ < openFirst) cur.open = true;
+        const sm = document.createElement("summary"); sm.append(k); cur.append(sm);
+        const body = document.createElement("div"); body.className = "sect-body"; cur.append(body); out.append(cur);
+      } else if (cur) cur.lastChild.append(k); else out.append(k);
+    });
+    box.replaceChildren(out);
+    // long sections (e.g. the days) fold again at each H3
+    $$(".sect-body", box).forEach((body) => {
+      const hs = [...body.children].filter((k) => k.tagName === "H3");
+      if (hs.length < 3) return;
+      const kids2 = [...body.childNodes], out2 = document.createDocumentFragment();
+      let sub = null;
+      kids2.forEach((k) => {
+        if (k.nodeType === 1 && k.tagName === "H3") {
+          sub = document.createElement("details"); sub.className = "sub";
+          const sm = document.createElement("summary"); sm.append(k); sub.append(sm);
+          const b = document.createElement("div"); b.className = "sub-body"; sub.append(b); out2.append(sub);
+        } else if (sub) sub.lastChild.append(k); else out2.append(k);
+      });
+      body.replaceChildren(out2);
+    });
+  }
   $$("input[type=checkbox]", box).forEach((i) => i.closest("li")?.classList.add("task", i.checked ? "done" : "open"));
   return box;
 }
@@ -124,6 +153,11 @@ const sections = (md) => {
 
 /* ---------- parsing the trip out of the Markdown ---------- */
 const MONTHS = { jan: 0, feb: 1, mar: 2, apr: 3, may: 4, jun: 5, jul: 6, aug: 7, sep: 8, oct: 9, nov: 10, dec: 11 };
+
+function short(t, n = 74) {
+  const one = t.split(/(?<=[.!?])\s/)[0];
+  return one.length <= n ? one : one.slice(0, n - 1).replace(/\s+\S*$/, "") + "…";
+}
 
 function parseDays(md) {
   const days = [];
@@ -143,7 +177,7 @@ function parseDays(md) {
       n: +m[1], dow: dm?.[1], d: dm ? +dm[2] : null, mon: dm?.[3], place,
       alt: alt ? +alt[1].replace(/,/g, "") : null,
       star: /★/.test(head), note: note ? plain(note) : "",
-      blurb: plain(first.replace(/^[-*]\s*/, "")).slice(0, 190),
+      blurb: short(plain(first.replace(/^[-*]\s*/, ""))),
     });
   }
   return days;
@@ -200,10 +234,10 @@ function ridgePath(seed, W, base, amp, step = 16) {
 function buildScene(host) {
   const W = 1600;
   const layers = [
-    { seed: 11, base: 330, amp: 230, color: "#8b7bb8", snow: true, k: 0.05 },
-    { seed: 29, base: 390, amp: 210, color: "#5f4f95", snow: true, k: 0.11 },
-    { seed: 47, base: 450, amp: 150, color: "#3d3a75", snow: false, k: 0.2 },
-    { seed: 83, base: 510, amp: 90, color: "#243460", snow: false, k: 0.32 },
+    { seed: 11, base: 330, amp: 230, color: "#b7addf", snow: true, k: 0.05 },
+    { seed: 29, base: 390, amp: 210, color: "#8e86cf", snow: true, k: 0.11 },
+    { seed: 47, base: 450, amp: 150, color: "#6c7fc4", snow: false, k: 0.2 },
+    { seed: 83, base: 510, amp: 90, color: "#4a8fb5", snow: false, k: 0.32 },
   ];
   host.innerHTML = "";
   // sun-mandala sits behind the far ridge
@@ -213,10 +247,10 @@ function buildScene(host) {
   [[84, 12, 5, 15], [108, 18, 4, 12], [134, 24, 3.5, 10]].forEach(([rad, n, rx, ry], i) => {
     for (let k = 0; k < n; k++) {
       const a = (360 / n) * k + i * 7;
-      el("ellipse", { cx: 0, cy: -rad, rx, ry, transform: `rotate(${a})`, fill: "none", stroke: "#f6c978", "stroke-opacity": 0.7 - i * 0.12, "stroke-width": 1.4 }, g);
+      el("ellipse", { cx: 0, cy: -rad, rx, ry, transform: `rotate(${a})`, fill: "none", stroke: "#fff3c4", "stroke-opacity": 0.9 - i * 0.12, "stroke-width": 1.6 }, g);
     }
   });
-  for (let k = 0; k < 60; k++) el("circle", { cx: 0, cy: -150, r: 1.5, fill: "#f6c978", "fill-opacity": 0.6, transform: `rotate(${k * 6})` }, g);
+  for (let k = 0; k < 60; k++) el("circle", { cx: 0, cy: -150, r: 1.5, fill: "#fff3c4", "fill-opacity": 0.8, transform: `rotate(${k * 6})` }, g);
   const defs = el("defs", {}, sun);
   const rg = el("radialGradient", { id: "sunfill" }, defs);
   el("stop", { offset: 0, "stop-color": "#ffe2a0" }, rg); el("stop", { offset: 1, "stop-color": "#f0a23a" }, rg);
@@ -237,7 +271,7 @@ function buildScene(host) {
   const r = rng(5);
   for (let i = 0; i < 46; i++) {
     const x = r() * W, y = 560 - Math.abs(Math.sin(x * 0.006)) * 40 - r() * 14, h = 26 + r() * 40;
-    const pine = el("g", { fill: i % 3 ? "#1d3a4a" : "#27505a", transform: `translate(${x.toFixed(0)} ${y.toFixed(0)})` }, f);
+    const pine = el("g", { fill: i % 3 ? "#2f8a5b" : "#4aa56c", transform: `translate(${x.toFixed(0)} ${y.toFixed(0)})` }, f);
     [[0, 1], [0.28, 0.8], [0.52, 0.6]].forEach(([dy, sc]) => el("path", { d: `M0 ${-h * (1 - dy)} L${(h * 0.36 * sc).toFixed(1)} ${-h * (0.52 - dy * 0.4)} L${(-h * 0.36 * sc).toFixed(1)} ${-h * (0.52 - dy * 0.4)}Z` }, pine));
     el("rect", { x: -1.5, y: -h * 0.12, width: 3, height: h * 0.14 }, pine);
   }
@@ -251,7 +285,7 @@ function buildFlags(host) {
   [{ y0: 14, sag: 74, y1: 52, off: 0, n: 1 }, { y0: 70, sag: 66, y1: 36, off: 2, n: 1 }].forEach((s, si) => {
     const q = (t) => ({ x: -20 * (1 - t) * (1 - t) + 2 * (1 - t) * t * (W / 2) + (W + 20) * t * t, y: (1 - t) * (1 - t) * s.y0 + 2 * (1 - t) * t * (s.y0 + s.sag * 1.7) + t * t * s.y1 });
     let d = ""; for (let t = 0; t <= 1.001; t += 0.02) { const p = q(t); d += (d ? "L" : "M") + p.x.toFixed(1) + " " + p.y.toFixed(1); }
-    el("path", { d, fill: "none", stroke: "rgba(255,255,255,.55)", "stroke-width": 1.2 }, svg);
+    el("path", { d, fill: "none", stroke: "rgba(255,255,255,.8)", "stroke-width": 1.4 }, svg);
     const count = Math.floor(W / 30);
     for (let i = 1; i < count; i++) {
       const t = i / count, p = q(t), p2 = q(t + 0.01), ang = Math.atan2(p2.y - p.y, p2.x - p.x) * 180 / Math.PI;
@@ -309,6 +343,7 @@ function icon(name) { return `<svg viewBox="0 0 24 24" aria-hidden="true"><use h
 function heroHTML(inner = "") {
   return `<section class="hero" id="hero">
     <div class="scene" id="scene"></div>
+    <div class="clouds" aria-hidden="true"><i></i><i></i><i></i></div>
     <div class="flags" id="flags"></div>
     <div class="hero-copy">${inner}</div>
   </section>`;
@@ -326,8 +361,8 @@ function gateView(error) {
     <h1 class="title">Himachal</h1>
     <p class="deva" lang="hi">हिमाचल प्रदेश</p>`) + `
     <section class="wrap gate">
-      <h2>This trail is private.</h2>
-      <p>The logbook is read live from our planning notes on GitHub. To open it on this device, paste a read-only GitHub key. It is kept in this browser only and sent to GitHub, nowhere else.</p>
+      <h2>Psst, this logbook is just for us.</h2>
+      <p>Paste a read-only GitHub key to peek inside on this device. It stays in this browser and goes to GitHub, nowhere else.</p>
       <form id="gate-form" autocomplete="off">
         <label for="tok">GitHub key</label>
         <input id="tok" type="password" inputmode="text" autocapitalize="off" spellcheck="false" placeholder="github_pat_…" required>
@@ -374,15 +409,16 @@ async function homeView() {
   const days = parseDays(itin.text);
   const title = plain((sum.text.match(/^#\s+(.+)$/m) || [, cfg.name])[1]);
   const [name, ...rest] = title.split(/\s+[—–-]\s+/);
-  const tag = rest.join(" — ");
+  const tag = rest.join(" · ");
   const when = facts.find((f) => /when/i.test(f.k));
-  const status = tripStatus(when && parseDates(when.v), days);
+  const range = when && parseDates(when.v);
+  const status = tripStatus(range, days);
   const route = facts.find((f) => /route/i.test(f.k));
+  const stat = facts.find((f) => /status/i.test(f.k));
   const secs = sections(sum.text);
   const weatherKey = Object.keys(secs).find((k) => /weather/i.test(k));
 
-  const hero = $(".hero-copy");
-  hero.innerHTML = `
+  $(".hero-copy").innerHTML = `
     <p class="om" aria-hidden="true">༄༅།</p>
     <h1 class="title">${esc(name.replace(/ Pradesh$/, ""))}</h1>
     <p class="deva" lang="hi">हिमाचल प्रदेश</p>
@@ -392,9 +428,17 @@ async function homeView() {
   const frag = document.createElement("div");
   frag.className = "home";
 
-  // at a glance
-  const glance = facts.filter((f) => !/route/i.test(f.k));
-  frag.insertAdjacentHTML("beforeend", `<section class="wrap glance"><dl>${glance.map((f) => `<div><dt>${esc(f.k)}</dt><dd>${inline(f.v)}</dd></div>`).join("")}</dl></section>`);
+  // at a glance: a few big numbers instead of paragraphs
+  const alts = days.map((d) => d.alt).filter(Boolean);
+  const nights = Math.max(0, (range ? Math.round((range.end - range.start) / 864e5) : days.length - 1));
+  const monthName = range ? range.start.toLocaleString("en", { month: "short" }) : "";
+  const tiles = [
+    range && { big: `${range.start.getDate()}–${range.end.getDate()}`, small: `${monthName} ${range.start.getFullYear()}`, ico: "📅" },
+    days.length && { big: `${days.length}`, small: `days · ${nights} nights`, ico: "🌄" },
+    alts.length && { big: Math.max(...alts).toLocaleString(), small: "metres, the highest we sleep", ico: "🏔️" },
+    { big: `${new Set(days.map((d) => d.place.split(/\s*[\/,]\s*/)[0])).size}`, small: "places to wake up in", ico: "📍" },
+  ].filter(Boolean);
+  frag.insertAdjacentHTML("beforeend", `<section class="wrap glance"><ul class="tiles">${tiles.map((t) => `<li><span class="ico" aria-hidden="true">${t.ico}</span><b>${esc(t.big)}</b><span>${esc(t.small)}</span></li>`).join("")}</ul>${stat ? `<p class="statusline">${inline(short(plain(stat.v), 110))}</p>` : ""}</section>`);
 
   if (route) {
     const stops = route.v.split("→").map((s) => plain(s));
@@ -406,49 +450,59 @@ async function homeView() {
   if (chart) {
     const s = document.createElement("section");
     s.className = "wrap";
-    s.innerHTML = `<h2 class="sec">The ridge we’ll walk</h2><p class="sec-sub">Where we sleep, in metres. The Sissu stop on the way up and down is what keeps the climb gentle.</p>`;
+    s.innerHTML = `<h2 class="sec">Up, up and away</h2><p class="sec-sub">Tap a flag to jump to that day.</p>`;
     const sc = document.createElement("div"); sc.className = "ridge-scroll"; sc.append(chart); s.append(sc);
     frag.append(s);
   }
 
-  // day cards
+  // postcards: the days, photo first
   if (days.length) {
     const s = document.createElement("section");
     s.className = "wrap";
-    s.innerHTML = `<h2 class="sec">Day by day</h2>
+    s.innerHTML = `<h2 class="sec">Our days</h2>
       <ol class="days">${days.map((d) => {
         const key = cfg.dayImages[d.n] || "flags";
         return `<li id="day-${d.n}"><a class="day" href="#/c/itinerary?day=${d.n}">
           <span class="arch"><img src="img/${key}.jpg" alt="" loading="lazy" decoding="async"><span class="stamp">${d.n}</span>${d.alt ? `<span class="alt-chip">${d.alt.toLocaleString()} m</span>` : ""}</span>
           <span class="day-body"><span class="day-when">${esc([d.dow, d.d, d.mon].filter(Boolean).join(" "))}</span>
           <strong>${esc(d.place)}${d.star ? ' <span class="star" title="Key day">★</span>' : ""}</strong>
-          ${d.blurb ? `<span class="day-blurb">${esc(d.blurb)}${d.blurb.length >= 189 ? "…" : ""}</span>` : ""}</span></a></li>`;
+          ${d.blurb ? `<span class="day-blurb">${esc(d.blurb)}</span>` : ""}</span></a></li>`;
       }).join("")}</ol>`;
     frag.append(s);
   }
 
-  // weather watch, straight from the summary
+  // photo strip
+  if (cfg.gallery?.length) {
+    const s = document.createElement("section");
+    s.className = "strip";
+    s.innerHTML = `<div class="wrap"><h2 class="sec">Along the way</h2></div>
+      <div class="strip-row">${cfg.gallery.map((g) => `<figure><img src="img/${g.img}.jpg" alt="${esc(g.cap)}" loading="lazy" decoding="async"><figcaption>${esc(g.cap)}</figcaption></figure>`).join("")}</div>`;
+    frag.append(s);
+  }
+
+  // weather: one line up top, the detail one tap away
   if (weatherKey) {
     const s = document.createElement("section");
     s.className = "wrap";
-    s.innerHTML = `<h2 class="sec">What the sky is saying</h2>`;
-    const card = document.createElement("div"); card.className = "frost";
-    card.append(renderMarkdown("## " + weatherKey + "\n" + secs[weatherKey]));
-    $("h2", card)?.remove();
-    s.append(card); frag.append(s);
+    const box = renderMarkdown("## x\n" + secs[weatherKey], { dropH1: false });
+    $("h2", box)?.remove();
+    const lead = $("p", box); const headline = lead ? short(lead.textContent, 120) : "";
+    s.innerHTML = `<h2 class="sec">Sky report</h2>`;
+    const d = document.createElement("details"); d.className = "frost sky";
+    d.innerHTML = `<summary><span class="snowflake" aria-hidden="true">❄️</span><span>${esc(headline)}</span><em>Details</em></summary>`;
+    d.append(box); s.append(d); frag.append(s);
   }
 
-  // chapters
+  // chapters: photo tiles
   const grid = document.createElement("section");
   grid.className = "wrap";
-  grid.innerHTML = `<h2 class="sec">The whole logbook</h2><ul class="chapters">${cfg.chapters.map((c) => `
-    <li><a href="#/c/${c.id}">${icon(c.icon)}<span><strong>${esc(c.title)}</strong><em>${esc(c.blurb)}</em></span></a></li>`).join("")}</ul>`;
+  grid.innerHTML = `<h2 class="sec">Pick a chapter</h2><ul class="chapters">${cfg.chapters.map((c) => `
+    <li><a href="#/c/${c.id}" style="--img:url('img/${c.img}.jpg')"><span class="ch-ico">${icon(c.icon)}</span><strong>${esc(c.title)}</strong></a></li>`).join("")}</ul>`;
   frag.append(grid);
   frag.append(footer(Math.max(sum.at, itin.at), sum.offline));
   app.append(frag);
   setActiveTab("home");
   document.title = `${name} · trip logbook`;
-  if (!reduceMotion) observeReveal();
 }
 
 function footer(at, offline) {
@@ -477,7 +531,7 @@ async function chapterView(id, query) {
   }
   const h1 = (doc.text.match(/^#\s+(.+)$/m) || [, ch.title])[1];
   const i = cfg.chapters.indexOf(ch), prev = cfg.chapters[i - 1], next = cfg.chapters[i + 1];
-  const prose = renderMarkdown(doc.text);
+  const prose = renderMarkdown(doc.text, { sectioned: true });
   const heads = $$("h2, h3", prose);
   const toc = heads.map((h) => `<li class="${h.tagName.toLowerCase()}"><a href="#" data-anchor="${h.id}">${esc(plain(h.textContent))}</a></li>`).join("");
 
@@ -493,9 +547,12 @@ async function chapterView(id, query) {
       <aside class="toc">
         <details open id="toc-d"><summary>On this page</summary><ul>${toc}</ul></details>
       </aside>
-      <article id="doc"></article>
+      <article id="doc"><button class="linkbtn" id="expand" type="button">Open all sections</button></article>
     </div>`;
   $("#doc").append(prose);
+  let all = false;
+  $("#expand").onclick = (e) => { all = !all; $$(".sect", prose).forEach((d) => (d.open = all)); e.target.textContent = all ? "Close all sections" : "Open all sections"; };
+  if (!$(".sect", prose)) $("#expand").remove();
   const nav = document.createElement("nav");
   nav.className = "pager wrap-narrow";
   nav.innerHTML = `${prev ? `<a href="#/c/${prev.id}" rel="prev"><small>Previous</small>${esc(prev.title)}</a>` : "<span></span>"}${next ? `<a href="#/c/${next.id}" rel="next"><small>Next</small>${esc(next.title)}</a>` : "<span></span>"}`;
@@ -511,7 +568,7 @@ async function chapterView(id, query) {
   let target = null;
   if (q.get("day")) target = heads.find((h) => new RegExp(`^Day ${q.get("day")}\\b`).test(h.textContent.trim()));
   if (q.get("h")) target = document.getElementById(q.get("h"));
-  if (target) requestAnimationFrame(() => target.scrollIntoView({ block: "start" })); else scrollTo(0, 0);
+  if (target) { openAncestors(target); requestAnimationFrame(() => target.scrollIntoView({ block: "start" })); } else scrollTo(0, 0);
 }
 
 function tocSpy(heads) {
@@ -596,12 +653,15 @@ $("#refresh").onclick = async () => {
   route();
 };
 
+function openAncestors(t) { for (let d = t?.closest("details"); d; d = d.parentElement?.closest("details")) d.open = true; }
 // in-page anchors (table of contents, [text](#heading))
 document.addEventListener("click", (e) => {
   const a = e.target.closest("a[data-anchor]");
   if (!a) return;
   e.preventDefault();
-  document.getElementById(a.dataset.anchor)?.scrollIntoView({ behavior: reduceMotion ? "auto" : "smooth", block: "start" });
+  const t = document.getElementById(a.dataset.anchor);
+  openAncestors(t);
+  t?.scrollIntoView({ behavior: reduceMotion ? "auto" : "smooth", block: "start" });
 });
 // ridge peaks → day cards
 document.addEventListener("click", (e) => {

@@ -26,6 +26,14 @@ window.TRIP = {
     { id: "outreach",        file: "outreach.md",        title: "Outreach",            icon: "mail",     img: "sissu",       blurb: "Operators, messages and replies" },
   ],
 
+  // The photo strip on the home page.
+  gallery: [
+    { img: "norbulingka", cap: "Norbulingka" }, { img: "kangra", cap: "Kangra Fort" }, { img: "manali", cap: "Atal Tunnel" },
+    { img: "sissu", cap: "Sissu" }, { img: "kunzum", cap: "Kunzum La" }, { img: "key", cap: "Key Gompa" },
+    { img: "langza", cap: "Langza" }, { img: "kibber", cap: "Kibber" }, { img: "dhankar", cap: "Dhankar" },
+    { img: "tabo", cap: "Tabo" }, { img: "chandrataal", cap: "Chandra Taal" }, { img: "palampur", cap: "Palampur tea" },
+  ],
+
   // Which photo illustrates which day (falls back to the prayer flags).
   dayImages: { 1: "norbulingka", 2: "kangra", 3: "manali", 4: "sissu", 5: "kunzum", 6: "key", 7: "dhankar", 8: "chandrataal", 9: "palampur", 10: "delhi", 11: "flags" },
 };
