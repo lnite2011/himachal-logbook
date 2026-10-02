@@ -34,6 +34,50 @@ window.TRIP = {
     { img: "tabo", cap: "Tabo" }, { img: "chandrataal", cap: "Chandra Taal" }, { img: "palampur", cap: "Palampur tea" },
   ],
 
+  // The trip map. Coordinates are approximate (villages, passes, sights) and the
+  // drawn roads are simplified, not turn-by-turn. Days come from itinerary.md.
+  map: {
+    center: [32.15, 77.3], zoom: 8,
+    // where we sleep, and which days we're there
+    places: {
+      sidhpur:  { name: "Sidhpur",   ll: [32.2113, 76.3190], days: [1, 2] },
+      manali:   { name: "Manali",    ll: [32.2432, 77.1892], days: [3] },
+      sissu:    { name: "Sissu",     ll: [32.4883, 77.1137], days: [4, 8] },
+      kaza:     { name: "Kaza",      ll: [32.2276, 78.0710], days: [5, 6, 7] },
+      palampur: { name: "Palampur",  ll: [32.1109, 76.5363], days: [9] },
+      delhi:    { name: "Delhi",     ll: [28.5562, 77.1000], days: [10] },
+    },
+    // little stops worth a dot
+    sights: [
+      { day: 1, name: "Gaggal airport", ll: [32.1651, 76.2634] },
+      { day: 2, name: "Kangra Fort", ll: [32.0867, 76.2630] },
+      { day: 2, name: "McLeod Ganj", ll: [32.2426, 76.3213] },
+      { day: 3, name: "Hadimba Temple", ll: [32.2480, 77.1800] },
+      { day: 4, name: "Atal Tunnel", ll: [32.3677, 77.1357] },
+      { day: 5, name: "Kunzum La, 4,590 m", ll: [32.3956, 77.6286] },
+      { day: 6, name: "Key Gompa", ll: [32.2996, 78.0106] },
+      { day: 6, name: "Kibber", ll: [32.3300, 78.0140] },
+      { day: 6, name: "Langza", ll: [32.2760, 78.0710] },
+      { day: 7, name: "Dhankar", ll: [32.1038, 78.2186] },
+      { day: 7, name: "Tabo", ll: [32.0931, 78.3852] },
+      { day: 8, name: "Chandra Taal", ll: [32.4756, 77.6147] },
+    ],
+    // the roads, one piece per day. type: drive | side | fly
+    segments: [
+      { day: 1, type: "drive", pts: [[32.1651, 76.2634], [32.19, 76.29], [32.2113, 76.3190]] },
+      { day: 2, type: "side", pts: [[32.2113, 76.3190], [32.15, 76.27], [32.0867, 76.2630], [32.17, 76.30], [32.2426, 76.3213]] },
+      { day: 3, type: "drive", pts: [[32.2113, 76.3190], [32.1109, 76.5363], [32.05, 76.65], [31.99, 76.79], [31.95, 76.95], [31.9576, 77.1095], [32.2432, 77.1892]] },
+      { day: 4, type: "drive", pts: [[32.2432, 77.1892], [32.3677, 77.1357], [32.4883, 77.1137]] },
+      { day: 5, type: "drive", pts: [[32.4883, 77.1137], [32.4333, 77.2167], [32.40, 77.30], [32.35, 77.57], [32.3956, 77.6286], [32.37, 77.98], [32.2276, 78.0710]] },
+      { day: 6, type: "side", pts: [[32.2276, 78.0710], [32.2996, 78.0106], [32.3300, 78.0140], [32.2760, 78.0710], [32.2276, 78.0710]] },
+      { day: 7, type: "side", pts: [[32.2276, 78.0710], [32.1038, 78.2186], [32.0931, 78.3852]] },
+      { day: 8, type: "drive", pts: [[32.2276, 78.0710], [32.37, 77.98], [32.3956, 77.6286], [32.35, 77.57], [32.4756, 77.6147], [32.35, 77.57], [32.40, 77.30], [32.4333, 77.2167], [32.4883, 77.1137]] },
+      { day: 9, type: "drive", pts: [[32.4883, 77.1137], [32.3677, 77.1357], [32.2432, 77.1892], [31.9576, 77.1095], [31.7088, 76.9320], [31.99, 76.79], [32.05, 76.65], [32.1109, 76.5363]] },
+      { day: 10, type: "drive", pts: [[32.1109, 76.5363], [32.1651, 76.2634]] },
+      { day: 10, type: "fly", pts: [[32.1651, 76.2634], [30.4, 76.6], [28.5562, 77.1000]] },
+    ],
+  },
+
   // Which photo illustrates which day (falls back to the prayer flags).
   dayImages: { 1: "norbulingka", 2: "kangra", 3: "manali", 4: "sissu", 5: "kunzum", 6: "key", 7: "dhankar", 8: "chandrataal", 9: "palampur", 10: "delhi", 11: "flags" },
 };

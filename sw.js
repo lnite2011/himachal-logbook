@@ -1,7 +1,7 @@
 // Offline shell for patchy Spiti signal. Page content (the Markdown) is cached
 // separately in localStorage by app.js; this only keeps the site itself available.
 const V = "himachal-v1";
-const SHELL = ["./", "index.html", "styles.css", "app.js", "config.js", "credits.json", "icon.svg", "vendor/marked.min.js", "vendor/purify.min.js"];
+const SHELL = ["./", "index.html", "styles.css", "app.js", "config.js", "credits.json", "icon.svg", "vendor/marked.min.js", "vendor/purify.min.js", "vendor/leaflet.js", "vendor/leaflet.css"];
 
 self.addEventListener("install", (e) => {
   e.waitUntil(caches.open(V).then((c) => c.addAll(SHELL)).then(() => self.skipWaiting()));
@@ -11,7 +11,7 @@ self.addEventListener("activate", (e) => {
 });
 self.addEventListener("fetch", (e) => {
   const u = new URL(e.request.url);
-  if (e.request.method !== "GET" || u.hostname === "api.github.com") return;
+  if (e.request.method !== "GET" || u.hostname === "api.github.com" || u.hostname.includes("opentopomap")) return;
   const isImg = /\.(jpe?g|png|svg|woff2?)$/.test(u.pathname) || u.hostname.includes("gstatic");
   e.respondWith(
     isImg

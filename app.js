@@ -178,6 +178,8 @@ function parseDays(md) {
       alt: alt ? +alt[1].replace(/,/g, "") : null,
       star: /★/.test(head), note: note ? plain(note) : "",
       blurb: short(plain(first.replace(/^[-*]\s*/, ""))),
+      lead: short(plain(first.replace(/^[-*]\s*/, "")), 230),
+      bullets: body.split("\n").filter((l) => /^[-*]\s/.test(l)).map((l) => short(plain(l.replace(/^[-*]\s*/, "")), 105)).filter((l) => l.length > 12 && !/^(sleep|✅? ?booked)/i.test(l)).slice(0, 4),
     });
   }
   return days;
@@ -335,6 +337,110 @@ function ridgeChart(days) {
   return wrap;
 }
 
+
+/* ---------- the trip map: terrain, a route, and an overlay per day ---------- */
+let tripMap = null, playTimer = null;
+function mapSection() {
+  const s = document.createElement("section");
+  s.className = "wrap mapsec";
+  s.innerHTML = `<h2 class="sec">Where the road goes</h2><p class="sec-sub">Tap a pin for the day, or ride along.</p>
+    <div class="mapbox">
+      <div id="tmap" role="application" aria-label="Map of the trip"></div>
+      <button class="play" id="play" type="button"><span aria-hidden="true">▶</span> Ride along</button>
+      <aside class="ov" id="ov" hidden aria-live="polite"></aside>
+      <ul class="mkey" aria-hidden="true"><li><i class="k-drive"></i>Drive</li><li><i class="k-side"></i>Day trip</li><li><i class="k-fly"></i>Flight</li></ul>
+    </div>
+    <p class="map-note">Roads are drawn simply, not turn by turn. Map © OpenStreetMap contributors, SRTM · style © OpenTopoMap (CC-BY-SA).</p>`;
+  return s;
+}
+
+function initTripMap(days) {
+  const box = $("#tmap");
+  if (!box) return;
+  stopPlay();
+  if (tripMap) { tripMap.remove(); tripMap = null; }
+  if (!window.L) { box.innerHTML = `<p class="nomap">The map needs a connection. Everything else works offline.</p>`; $("#play")?.remove(); return; }
+  const M = cfg.map, byDay = Object.fromEntries(days.map((d) => [d.n, d]));
+  const map = (tripMap = L.map(box, { scrollWheelZoom: false, zoomControl: true, attributionControl: false }));
+  L.tileLayer("https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png", { maxZoom: 15, subdomains: "abc" }).addTo(map);
+  const STYLE = {
+    drive: { color: "#f39a1e", weight: 4, opacity: 0.6, lineCap: "round" },
+    side: { color: "#1f8a90", weight: 3, opacity: 0.7, dashArray: "2 8", lineCap: "round" },
+    fly: { color: "#c2394a", weight: 3, opacity: 0.7, dashArray: "6 8", lineCap: "round" },
+  };
+  const lines = M.segments.filter((sg) => byDay[sg.day]).map((sg) => ({ ...sg, line: L.polyline(sg.pts, STYLE[sg.type]).addTo(map) }));
+  const dayLoc = {};
+  Object.values(M.places).forEach((p) => p.days.forEach((n) => (dayLoc[n] = p)));
+  M.sights.filter((x) => byDay[x.day]).forEach((x) => {
+    L.marker(x.ll, { icon: L.divIcon({ className: "pinwrap", html: `<span class="tdot"></span>`, iconSize: [14, 14] }), title: x.name })
+      .addTo(map).bindTooltip(x.name, { direction: "top", offset: [0, -6] }).on("click", () => select(x.day, true));
+  });
+  Object.values(M.places).forEach((p) => {
+    const ds = p.days.filter((n) => byDay[n]); if (!ds.length) return;
+    const label = ds.length > 1 ? `${ds[0]}–${ds.at(-1)}` : `${ds[0]}`;
+    L.marker(p.ll, { icon: L.divIcon({ className: "pinwrap", html: `<span class="tpin">${label}</span>`, iconSize: [0, 0] }), title: `${p.name}, day ${label}`, riseOnHover: true })
+      .addTo(map).on("click", () => select(ds[0], true));
+  });
+  const all = [...Object.entries(M.places).filter(([k]) => k !== "delhi").map(([, p]) => p.ll), ...M.sights.map((x) => x.ll)]; // Delhi is far south: it only comes into view on its own day
+  map.fitBounds(L.latLngBounds(all).pad(0.08), { maxZoom: 9 });
+  const refit = () => { map.invalidateSize(); if (!cur) map.fitBounds(L.latLngBounds(all).pad(0.08), { maxZoom: 9 }); };
+  setTimeout(refit, 300); addEventListener("load", refit);
+
+  L.DomEvent.disableClickPropagation($("#ov")); L.DomEvent.disableScrollPropagation($("#ov"));
+  L.control.attribution({ prefix: false }).addAttribution("© OSM · SRTM · OpenTopoMap").addTo(map);
+
+  let cur = 0;
+  const nums = days.map((d) => d.n).filter((n) => dayLoc[n]);
+  function select(n, user) {
+    if (user) stopPlay();
+    cur = n;
+    const d = byDay[n], p = dayLoc[n]; if (!d) return;
+    lines.forEach((l) => l.line.setStyle(l.day === n ? { ...STYLE[l.type], weight: 7, opacity: 1, dashArray: l.type === "drive" ? null : STYLE[l.type].dashArray } : { ...STYLE[l.type], opacity: 0.3 }));
+    lines.filter((l) => l.day === n).forEach((l) => l.line.bringToFront());
+    const pts = lines.filter((l) => l.day === n).flatMap((l) => l.pts); pts.push(p.ll);
+    const narrow = box.clientWidth < 700;
+    map.flyToBounds(L.latLngBounds(pts).pad(0.35), { duration: reduceMotion ? 0 : 1.1, maxZoom: 10, paddingTopLeft: narrow ? [0, 0] : [380, 0], paddingBottomRight: narrow ? [0, 260] : [0, 0] });
+    $$(".peak").forEach((k) => k.classList.toggle("on", +k.dataset.day === n));
+    const img = cfg.dayImages[n] || "flags";
+    const co = p.days.filter((x) => byDay[x]);
+    const i = nums.indexOf(n);
+    const ov = $("#ov"); ov.hidden = false;
+    ov.innerHTML = `
+      <button class="ov-x" type="button" aria-label="Close">×</button>
+      <img src="img/${img}.jpg" alt="">
+      <div class="ov-b">
+        ${co.length > 1 ? `<div class="ov-days">${co.map((x) => `<button type="button" data-d="${x}" class="${x === n ? "on" : ""}">Day ${x}</button>`).join("")}</div>` : ""}
+        <p class="ov-when">Day ${d.n} · ${esc([d.dow, d.d, d.mon].filter(Boolean).join(" "))}</p>
+        <h3>${esc(d.place)}${d.star ? ' <span class="star">★</span>' : ""}</h3>
+        ${d.alt ? `<p class="ov-alt">⛰️ ${d.alt.toLocaleString()} m</p>` : ""}
+        ${d.lead ? `<p class="ov-lead">${esc(d.lead)}</p>` : ""}
+        ${d.bullets?.length ? `<ul>${d.bullets.map((b) => `<li>${esc(b)}</li>`).join("")}</ul>` : ""}
+        <div class="ov-nav">
+          <button type="button" data-step="-1" ${i <= 0 ? "disabled" : ""} aria-label="Previous day">‹</button>
+          <a class="btn" href="#/c/itinerary?day=${n}">Read day ${n}</a>
+          <button type="button" data-step="1" ${i >= nums.length - 1 ? "disabled" : ""} aria-label="Next day">›</button>
+        </div>
+      </div>`;
+  }
+  $("#ov").addEventListener("click", (e) => {
+    const b = e.target.closest("button"); if (!b) return;
+    if (b.classList.contains("ov-x")) { stopPlay(); cur = 0; $("#ov").hidden = true; lines.forEach((l) => l.line.setStyle(STYLE[l.type])); $$(".peak.on").forEach((k) => k.classList.remove("on")); map.fitBounds(L.latLngBounds(all).pad(0.08), { maxZoom: 9 }); }
+    else if (b.dataset.step) select(nums[nums.indexOf(cur) + +b.dataset.step], true);
+    else if (b.dataset.d) select(+b.dataset.d, true);
+  });
+  $("#play").onclick = () => {
+    if (playTimer) return stopPlay();
+    $("#play").innerHTML = `<span aria-hidden="true">❚❚</span> Pause`;
+    let i = nums.indexOf(cur) + 1; if (i <= 0 || i >= nums.length) i = 0;
+    const step = () => { if (i >= nums.length) return stopPlay(); select(nums[i++]); };
+    step(); playTimer = setInterval(step, 4200);
+  };
+}
+function stopPlay() {
+  clearInterval(playTimer); playTimer = null;
+  const b = $("#play"); if (b) b.innerHTML = `<span aria-hidden="true">▶</span> Ride along`;
+}
+
 /* ---------- views ---------- */
 const Chapter = (id) => cfg.chapters.find((c) => c.id === id);
 
@@ -455,6 +561,9 @@ async function homeView() {
     frag.append(s);
   }
 
+  // the map
+  if (cfg.map && days.length) frag.append(mapSection());
+
   // postcards: the days, photo first
   if (days.length) {
     const s = document.createElement("section");
@@ -501,6 +610,7 @@ async function homeView() {
   frag.append(grid);
   frag.append(footer(Math.max(sum.at, itin.at), sum.offline));
   app.append(frag);
+  initTripMap(days);
   setActiveTab("home");
   document.title = `${name} · trip logbook`;
 }

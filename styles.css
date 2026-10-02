@@ -364,3 +364,44 @@ body[data-locked] .tabs, body[data-locked] #menu-btn, body[data-locked] #refresh
 .sub-body { padding: 0 1.1rem 1rem; }
 .sub-body > :first-child { margin-top: .4rem; }
 @media (max-width: 720px) { .chapters { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .7rem; } .chapters a { min-height: 120px; padding: .8rem; } .chapters strong { font-size: 1.05rem; } }
+
+/* ---------- trip map ---------- */
+.mapsec { padding-top: 3.2rem; }
+.mapbox { position: relative; margin-top: 1rem; border-radius: 26px; overflow: hidden; box-shadow: 0 24px 50px -28px rgba(30, 60, 140, .7); border: 4px solid #fff; background: #dfeaf2; }
+#tmap { height: clamp(460px, 70vh, 640px); z-index: 0; }
+#tmap .leaflet-tile-pane { filter: saturate(1.1) brightness(1.04); }
+.nomap { padding: 2rem; }
+.pinwrap { background: none; border: 0; }
+.tpin { position: absolute; left: 0; top: 0; translate: -50% -115%; display: grid; place-items: center; min-width: 40px; height: 40px; padding: 0 .55rem; border-radius: 20px 20px 20px 4px; background: var(--maroon); color: #fff; font: 1.05rem/1 var(--display); border: 3px solid #fff; box-shadow: 0 6px 16px rgba(30, 40, 90, .45); rotate: -4deg; white-space: nowrap; }
+.tdot { display: block; width: 14px; height: 14px; border-radius: 50%; background: #fff; border: 3px solid var(--teal); box-shadow: 0 2px 6px rgba(0, 0, 0, .3); }
+.play { position: absolute; z-index: 500; top: 12px; right: 12px; display: inline-flex; gap: .5rem; align-items: center; min-height: 44px; padding: 0 1.1rem; border: 0; border-radius: 999px; background: var(--sun); color: var(--ink); font: 700 1rem var(--body); cursor: pointer; box-shadow: 0 8px 20px -8px rgba(0, 0, 0, .5); }
+.mkey { position: absolute; z-index: 500; right: 12px; bottom: 26px; list-style: none; margin: 0; padding: .45rem .8rem; display: flex; gap: .9rem; background: rgba(255, 255, 255, .92); border-radius: 999px; font-size: .8rem; font-weight: 600; }
+.mkey i { display: inline-block; width: 22px; border-top: 4px solid var(--saffron); vertical-align: middle; margin-right: .3rem; }
+.mkey .k-side { border-top: 3px dotted var(--teal); } .mkey .k-fly { border-top: 3px dashed var(--maroon); }
+.ov { position: absolute; z-index: 600; left: 14px; top: 14px; bottom: 14px; width: min(350px, calc(100% - 28px)); overflow: auto; background: #fff; border-radius: 20px; box-shadow: 0 20px 50px -14px rgba(20, 40, 100, .6); animation: ovin .35s cubic-bezier(.2, .8, .2, 1); }
+.ov[hidden] { display: none; }
+@keyframes ovin { from { opacity: 0; transform: translateX(-14px); } }
+.ov > img { width: 100%; height: 150px; object-fit: cover; }
+.ov-x { position: absolute; top: 10px; right: 10px; width: 36px; height: 36px; border: 0; border-radius: 50%; background: rgba(255, 255, 255, .92); font-size: 1.5rem; line-height: 1; cursor: pointer; color: var(--ink); }
+.ov-b { padding: .9rem 1.1rem 1.1rem; }
+.ov-days { display: flex; gap: .4rem; margin-bottom: .6rem; }
+.ov-days button { border: 2px solid var(--line); background: #fff; border-radius: 999px; padding: .15rem .8rem; font-weight: 700; cursor: pointer; }
+.ov-days button.on { background: var(--maroon); border-color: var(--maroon); color: #fff; }
+.ov-when { margin: 0; color: var(--maroon); font-weight: 700; font-size: .92rem; }
+.ov h3 { margin: .1rem 0 .3rem; font: 1.6rem/1.1 var(--display); }
+.ov-alt { display: inline-block; margin: 0 0 .5rem; padding: .15rem .7rem; border-radius: 999px; background: var(--frost); font-weight: 700; font-size: .9rem; }
+.ov-lead { margin: .2rem 0 .5rem; font-size: .97rem; line-height: 1.5; }
+.ov ul { margin: 0 0 .8rem; padding-left: 1.1rem; font-size: .9rem; line-height: 1.45; color: var(--ink-soft); display: grid; gap: .25rem; }
+.ov-nav { display: flex; align-items: center; justify-content: space-between; gap: .5rem; }
+.ov-nav button { width: 44px; height: 44px; border-radius: 50%; border: 2px solid var(--line); background: #fff; font-size: 1.5rem; line-height: 1; cursor: pointer; color: var(--ink); }
+.ov-nav button:disabled { opacity: .35; cursor: default; }
+.ov-nav .btn { display: inline-grid; place-items: center; text-decoration: none; min-height: 44px; }
+.map-note { margin: .6rem 0 0; font-size: .8rem; color: var(--ink-soft); }
+.peak.on .knot { fill: var(--saffron); r: 7; }
+@media (max-width: 720px) {
+  #tmap { height: 560px; }
+  .ov { left: 8px; right: 8px; top: auto; bottom: 8px; width: auto; max-height: 52%; border-radius: 18px; }
+  .ov > img { height: 90px; }
+  .mkey { display: none; }
+  .play { top: 8px; right: 8px; }
+}
