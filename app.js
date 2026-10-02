@@ -16,6 +16,14 @@ const store = {
   del(k) { try { localStorage.removeItem(k); } catch {} },
 };
 const TOKEN_KEY = "himachal:key";
+const CHAPTERS_KEY = "himachal:chapters"; // set by a shared link: which chapters this guest may see
+const ALWAYS = ["summary", "itinerary"]; // the home page is built from these two
+const allowed = (() => { try { return JSON.parse(store.get(CHAPTERS_KEY) || "null"); } catch { return null; } })();
+const isGuest = !!allowed;
+if (allowed) cfg.chapters = cfg.chapters.filter((c) => ALWAYS.includes(c.id) || allowed.includes(c.id));
+$$(".tabs a[data-tab]").forEach((a) => { if (a.dataset.tab !== "home" && !cfg.chapters.some((c) => c.id === a.dataset.tab)) a.remove(); });
+$(".tabs").style.setProperty("--n", $$(".tabs > *").length);
+if (isGuest) $("#drawer-share")?.remove();
 const getToken = () => store.get(TOKEN_KEY);
 
 /* ---------- fetching Markdown from GitHub (or local files in dev) ---------- */
@@ -533,6 +541,26 @@ function fail(e) {
 function missing(ch) {
   app.innerHTML = `<section class="wrap state"><h2>${esc(ch.title)} isn’t on GitHub yet.</h2><p><code>${esc(ch.file)}</code> wasn’t found in <code>${esc(cfg.repo.path)}</code>. Commit and push it, then refresh.</p><p><a href="#/">Back to the trail</a></p></section>`;
 }
+async function joinView(query) {
+  const q = new URLSearchParams(query || "");
+  const k = q.get("k"), c = (q.get("c") || "").split(",").filter(Boolean);
+  if (!k) return gateView();
+  app.innerHTML = heroHTML(`<div class="loading">Opening the logbook…</div>`);
+  mountHero();
+  store.set(TOKEN_KEY, k);
+  try {
+    await fetchFile(cfg.chapters[0].file);
+  } catch (err) {
+    store.del(TOKEN_KEY);
+    history.replaceState(null, "", location.pathname + location.search + "#/");
+    return gateView("This link no longer works. The key behind it may have expired or been revoked. Ask for a fresh link.");
+  }
+  if (c.length) store.set(CHAPTERS_KEY, JSON.stringify(c)); else store.del(CHAPTERS_KEY);
+  // keep the key out of the address bar and the browser history
+  history.replaceState(null, "", location.pathname + location.search + "#/");
+  location.reload();
+}
+
 function notFound() {
   app.innerHTML = `<section class="wrap state"><h2>That page isn’t on the map.</h2><p><a href="#/">Back to the trail</a></p></section>`;
 }
@@ -559,7 +587,7 @@ drawer.addEventListener("click", (e) => { if (e.target.closest("a")) openDrawer(
 document.addEventListener("keydown", (e) => { if (e.key === "Escape" && !drawer.hidden) openDrawer(false); });
 $("#lock-btn").onclick = () => {
   if (isLocal) return alert("Local preview reads the files directly; there is no key to remove.");
-  store.del(TOKEN_KEY); cfg.chapters.forEach((c) => store.del("md:" + c.file)); openDrawer(false); route();
+  store.del(TOKEN_KEY); store.del(CHAPTERS_KEY); cfg.chapters.forEach((c) => store.del("md:" + c.file)); openDrawer(false); route();
 };
 $("#refresh").onclick = async () => {
   const b = $("#refresh"); b.classList.add("spin");
@@ -608,6 +636,7 @@ function route() {
   const [path, query] = h.split("?");
   document.body.dataset.view = path === "/" ? "home" : "page";
   $("#bar").classList.toggle("solid", path !== "/");
+  if (path === "/join") return joinView(query);
   if (!isLocal && !getToken()) { document.body.dataset.view = "home"; return gateView(); }
   if (path === "/") return homeView();
   if (path === "/credits") return creditsView();

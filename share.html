@@ -1,0 +1,138 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Share a link · Himachal logbook</title>
+<meta name="theme-color" content="#171b40">
+<meta name="robots" content="noindex, nofollow">
+<meta name="referrer" content="no-referrer">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible+Next:ital,wght@0,400;0,600;0,700;1,400&family=Yatra+One&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+<style>
+  .share { max-width: 680px; padding: 2.2rem 0 4rem; }
+  .share form { display: grid; gap: 1.1rem; }
+  .share label.f { font-weight: 700; display: grid; gap: .35rem; }
+  .share small { font-weight: 400; color: var(--ink-soft); }
+  .share input[type=password], .share input[type=text] { font: 1rem var(--body); padding: .8rem 1rem; border-radius: 12px; border: 2px solid var(--line); background: var(--paper); color: var(--ink); min-height: 48px; width: 100%; }
+  .share fieldset { border: 1px solid var(--line); border-radius: 14px; background: var(--paper); padding: .8rem 1.1rem 1rem; margin: 0; }
+  .share legend { font-weight: 700; padding: 0 .4rem; }
+  .share .opts { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: .2rem .8rem; }
+  .share .opts label { display: flex; gap: .55rem; align-items: center; min-height: 40px; }
+  .share .opts input { width: 1.15rem; height: 1.15rem; accent-color: var(--maroon); }
+  .share .opts .fixed { opacity: .7; }
+  .out { background: var(--frost); border: 1px solid var(--line); border-radius: 14px; padding: 1rem 1.2rem; display: grid; gap: .7rem; }
+  .out textarea { font: .85rem ui-monospace, Menlo, monospace; width: 100%; min-height: 6.5rem; padding: .7rem; border-radius: 10px; border: 1px solid var(--line); background: var(--paper); color: var(--ink); resize: vertical; word-break: break-all; }
+  .row { display: flex; gap: .6rem; flex-wrap: wrap; }
+  .btn.alt { background: transparent; color: var(--ink); border: 2px solid var(--line); }
+  .warn { margin-bottom: 1.6rem; border-left: 4px solid var(--tone-warn); background: var(--frost); padding: .7rem 1rem; border-radius: 0 12px 12px 0; }
+  .warn ul { margin: .4rem 0 0; padding-left: 1.2rem; }
+  .ok { color: var(--tone-ok); font-weight: 700; }
+  body { padding-bottom: 0; }
+</style>
+</head>
+<body>
+<header class="bar solid">
+  <a class="brand" href="./" aria-label="Back to the logbook">
+    <svg viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><path d="M2 26 11 10l5 8 4-6 10 14Z" fill="currentColor"/><circle cx="23" cy="9" r="3.2" fill="#e9922b"/></svg>
+    <span>Himachal</span>
+  </a>
+</header>
+
+<header class="chap-head" style="--img:url('img/flags.jpg')">
+  <div class="wrap">
+    <a class="crumb" href="./">← Back to the trail</a>
+    <h1>Share the trail</h1>
+    <p>Make one link that opens the logbook without asking for a key.</p>
+  </div>
+</header>
+
+<main class="wrap share">
+  <div class="warn">
+    <strong>Treat the link like a password.</strong>
+    <ul>
+      <li>Anyone who has it can open the chapters you tick below, and the key inside it can read <em>every</em> file in the planning repo through GitHub, so make a separate key just for this link.</li>
+      <li>The key is in the part of the address after the <code>#</code>. Browsers never send that part to a server, and the site removes it from the address bar after the first visit.</li>
+      <li>To cut someone off, delete that key in GitHub. Every link made from it stops working.</li>
+    </ul>
+  </div>
+
+  <form id="f" autocomplete="off">
+    <label class="f" for="tok">GitHub key for this link
+      <small>Create one at <a href="https://github.com/settings/personal-access-tokens/new" target="_blank" rel="noopener">GitHub › New fine-grained token</a>: name it “parents”, set an expiry after the trip, pick only <strong>travel-planning</strong>, and set <strong>Contents</strong> to Read-only. This page doesn’t save it.</small>
+      <input id="tok" type="password" autocapitalize="off" spellcheck="false" placeholder="github_pat_…" required>
+    </label>
+
+    <fieldset>
+      <legend>What can they see?</legend>
+      <div class="opts" id="opts"></div>
+    </fieldset>
+
+    <div class="row"><button class="btn" id="go" type="submit">Make the link</button></div>
+    <p class="gate-err" id="err" role="alert" hidden></p>
+  </form>
+
+  <section class="out" id="out" hidden aria-live="polite">
+    <p class="ok" style="margin:0">✓ The key works. Here is the link.</p>
+    <textarea id="url" readonly aria-label="Shareable link"></textarea>
+    <div class="row">
+      <button class="btn" id="copy" type="button">Copy link</button>
+      <button class="btn alt" id="share" type="button" hidden>Share…</button>
+      <a class="btn alt" id="try" target="_blank" rel="noopener" style="display:inline-grid;place-items:center;text-decoration:none">Test it in a new tab</a>
+    </div>
+    <small id="msg" class="sec-sub" style="margin:0"></small>
+  </section>
+</main>
+
+<script src="config.js"></script>
+<script>
+(() => {
+  const cfg = window.TRIP, $ = (s) => document.querySelector(s);
+  const ALWAYS = ["summary", "itinerary"];
+  const SAFE = ["summary", "itinerary", "food", "packing"]; // sensible default for family
+  $("#opts").innerHTML = cfg.chapters.map((c) => {
+    const fixed = ALWAYS.includes(c.id);
+    return `<label class="${fixed ? "fixed" : ""}"><input type="checkbox" value="${c.id}" ${fixed || SAFE.includes(c.id) ? "checked" : ""} ${fixed ? "disabled" : ""}> ${c.title}</label>`;
+  }).join("");
+
+  const r = cfg.repo;
+  async function check(tok) {
+    const url = `https://api.github.com/repos/${r.owner}/${r.name}/contents/${r.path}/${cfg.chapters[0].file}?ref=${r.ref}`;
+    const res = await fetch(url, { headers: { Accept: "application/vnd.github.raw+json", Authorization: `Bearer ${tok}` } });
+    return res.status;
+  }
+  const err = (m) => { const e = $("#err"); e.textContent = m; e.hidden = !m; };
+
+  $("#f").addEventListener("submit", async (e) => {
+    e.preventDefault(); err(""); $("#out").hidden = true;
+    const tok = $("#tok").value.trim(), btn = $("#go");
+    btn.disabled = true; btn.textContent = "Checking the key…";
+    try {
+      const st = await check(tok);
+      if (st !== 200) return err(st === 401 || st === 403 || st === 404
+        ? "GitHub refused that key. Check it hasn’t expired and has Contents: read-only access to " + r.name + "."
+        : "GitHub answered " + st + ". Try again in a moment.");
+      const picked = [...document.querySelectorAll("#opts input:checked")].map((i) => i.value);
+      const chapters = [...new Set([...ALWAYS, ...picked])];
+      const base = new URL("./", location.href).href;
+      const link = `${base}#/join?k=${encodeURIComponent(tok)}&c=${chapters.join(",")}`;
+      $("#url").value = link; $("#try").href = link; $("#out").hidden = false;
+      $("#msg").textContent = "Send it in a private message. Whoever opens it stays signed in on that device until they choose “Lock this device”.";
+      if (navigator.share) $("#share").hidden = false;
+      $("#out").scrollIntoView({ behavior: "smooth", block: "nearest" });
+    } catch { err("Couldn’t reach GitHub. Check your connection and try again."); }
+    finally { btn.disabled = false; btn.textContent = "Make the link"; }
+  });
+  $("#copy").addEventListener("click", async () => {
+    const t = $("#url"); t.select();
+    try { await navigator.clipboard.writeText(t.value); $("#copy").textContent = "Copied ✓"; } catch { document.execCommand("copy"); $("#copy").textContent = "Copied ✓"; }
+    setTimeout(() => ($("#copy").textContent = "Copy link"), 2000);
+  });
+  $("#share").addEventListener("click", () => navigator.share({ title: "Himachal trip logbook", text: "Our Himachal trip, live:", url: $("#url").value }).catch(() => {}));
+})();
+</script>
+</body>
+</html>
