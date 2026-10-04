@@ -14,6 +14,7 @@ window.TRIP = {
   chapters: [
     { id: "summary",         file: "summary.md",         title: "The shape of it",     icon: "compass",  img: "dhankar",     blurb: "Route, decisions and the weather watch" },
     { id: "itinerary",       file: "itinerary.md",       title: "Day by day",          icon: "scroll",   img: "key",         blurb: "Eleven days, hour by hour, with bookings" },
+    { id: "driver",          file: "driver.md",          title: "Driver plan",         icon: "scroll",   img: "sissu",       blurb: "Short, simple route sheet for Ganesh" },
     { id: "permits",         file: "permits.md",         title: "Permits & visas",     icon: "stamp",    img: "kaza",        blurb: "OCI, the T1 visa and the protected-area permit" },
     { id: "food",            file: "food.md",            title: "Where to eat",        icon: "bowl",     img: "mcleod",      blurb: "Momos, thukpa and good coffee" },
     { id: "packing",         file: "packing.md",         title: "Packing",             icon: "pack",     img: "kunzum",      blurb: "Layers, medicines and where to buy them" },
