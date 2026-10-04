@@ -9,343 +9,57 @@
 <meta name="referrer" content="no-referrer">
 <link rel="icon" href="icon.svg" type="image/svg+xml">
 <style>
-  :root {
-    --bg: #f6f3ec; --paper: #ffffff; --ink: #1b1d2a; --soft: #555a6e; --line: #d9d4c7;
-    --navy: #171b40; --maroon: #8f2a2a; --warn: #b4540a; --warn-bg: #fff3e3; --ok: #1d6b3a; --ok-bg: #e8f5ec;
-  }
-  @media (prefers-color-scheme: dark) {
-    :root { --bg: #11131f; --paper: #1b1e30; --ink: #f1efe8; --soft: #aeb2c4; --line: #343852; --navy: #0b0d1a; --maroon: #e08a8a; --warn: #f2a65a; --warn-bg: #2d2214; --ok: #6fd193; --ok-bg: #14281c; }
-    .card, .box, .day dl { border-color: #343852; }
-  }
+  :root { --bg:#f6f3ec; --paper:#fff; --ink:#1b1d2a; --soft:#555a6e; --line:#d9d4c7; --navy:#171b40; --maroon:#8f2a2a; --warn:#b4540a; --warn-bg:#fff3e3; --ok:#1d6b3a; --ok-bg:#e8f5ec; }
+  @media (prefers-color-scheme: dark) { :root { --bg:#11131f; --paper:#1b1e30; --ink:#f1efe8; --soft:#aeb2c4; --line:#343852; --navy:#0b0d1a; --maroon:#e08a8a; --warn:#f2a65a; --warn-bg:#2d2214; --ok:#6fd193; --ok-bg:#14281c; } }
   * { box-sizing: border-box; }
-  body { margin: 0; background: var(--bg); color: var(--ink); font: 1.125rem/1.55 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; -webkit-text-size-adjust: 100%; }
-  header { background: var(--navy); color: #fff; padding: 1.4rem 16px 1.6rem; }
-  .wrap { max-width: 720px; margin: 0 auto; padding: 0 16px; }
-  header .wrap { padding: 0; }
-  h1 { margin: 0 0 .3rem; font-size: 1.9rem; line-height: 1.2; }
-  header p { margin: 0; opacity: .9; }
-  h2 { font-size: 1.4rem; margin: 2rem 0 .7rem; }
-  .box { background: var(--paper); border: 1px solid var(--line); border-radius: 14px; padding: 1rem 1.2rem; margin: 1rem 0; }
-  .box.warn { background: var(--warn-bg); border-color: var(--warn); }
-  .box.ok { background: var(--ok-bg); border-color: var(--ok); }
-  .box h3 { margin: 0 0 .4rem; font-size: 1.15rem; }
-  ul { margin: .3rem 0; padding-left: 1.3rem; }
-  li { margin: .3rem 0; }
-  nav.days { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: .5rem; margin: 1rem 0; }
-  nav.days a { display: block; background: var(--paper); border: 1px solid var(--line); border-radius: 12px; padding: .6rem .8rem; text-decoration: none; color: var(--ink); min-height: 48px; }
-  nav.days a b { display: block; color: var(--maroon); }
-  nav.days a span { font-size: .9rem; color: var(--soft); }
-  .day { background: var(--paper); border: 1px solid var(--line); border-radius: 16px; margin: 1.4rem 0; overflow: hidden; scroll-margin-top: 1rem; }
-  .day > h2 { margin: 0; padding: .9rem 1.2rem; background: var(--navy); color: #fff; font-size: 1.3rem; }
-  .day > h2 small { display: block; font-weight: 400; font-size: .95rem; opacity: .85; }
-  .day .in { padding: .4rem 1.2rem 1.1rem; }
-  .big { display: grid; grid-template-columns: repeat(3, 1fr); gap: .5rem; margin: .9rem 0; }
-  .big div { background: var(--bg); border-radius: 12px; padding: .5rem .6rem; text-align: center; }
-  .big b { display: block; font-size: 1.35rem; line-height: 1.2; color: var(--maroon); }
-  .big span { font-size: .85rem; color: var(--soft); }
-  .day h3 { font-size: 1rem; margin: 1rem 0 .2rem; text-transform: uppercase; letter-spacing: .04em; color: var(--soft); }
-  .tag { display: inline-block; font-size: .85rem; font-weight: 700; padding: .05rem .5rem; border-radius: 99px; background: var(--warn-bg); color: var(--warn); border: 1px solid var(--warn); }
-  .tag.ok { background: var(--ok-bg); color: var(--ok); border-color: var(--ok); }
-  .sun { background: var(--warn-bg); border-radius: 12px; padding: .5rem .8rem; margin: .5rem 0; font-size: 1rem; }
-  footer { margin: 2rem 0 3rem; color: var(--soft); font-size: .95rem; }
-  @media (max-width: 380px) { .big b { font-size: 1.1rem; } }
+  body { margin:0; background:var(--bg); color:var(--ink); font:1.125rem/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif; -webkit-text-size-adjust:100%; }
+  header { background:var(--navy); color:#fff; padding:1.4rem 16px 1.6rem; }
+  .wrap { max-width:720px; margin:0 auto; padding:0 16px; }
+  header .wrap { padding:0; }
+  h1 { margin:0 0 .3rem; font-size:1.9rem; line-height:1.2; }
+  header p { margin:0; opacity:.9; }
+  h2.sec { font-size:1.4rem; margin:2rem 0 .7rem; }
+  .note { color:var(--soft); font-size:.95rem; margin:.5rem 0; }
+  nav.days { display:grid; grid-template-columns:repeat(auto-fill,minmax(150px,1fr)); gap:.5rem; margin:1rem 0 .3rem; }
+  nav.days a { display:block; background:var(--paper); border:1px solid var(--line); border-radius:12px; padding:.6rem .8rem; text-decoration:none; color:var(--ink); min-height:48px; }
+  nav.days a b { display:block; color:var(--maroon); }
+  nav.days a span { font-size:.9rem; color:var(--soft); }
+  nav.days a i { font-style:normal; font-weight:700; color:var(--ink); }
+  .hotels { display:grid; gap:.6rem; }
+  .hotel { background:var(--paper); border:1px solid var(--line); border-radius:14px; padding:.8rem 1rem; }
+  .hn { font-weight:700; font-size:1.15rem; }
+  .hw, .hd { color:var(--soft); font-size:1rem; }
+  .ht { margin-top:.25rem; font-size:1rem; }
+  .day { background:var(--paper); border:1px solid var(--line); border-radius:16px; margin:1.4rem 0; overflow:hidden; scroll-margin-top:1rem; }
+  .day > h2 { margin:0; padding:.9rem 1.2rem; background:var(--navy); color:#fff; font-size:1.3rem; }
+  .day > h2 small { display:block; font-weight:400; font-size:.95rem; opacity:.85; }
+  .in { padding:.4rem 1.2rem 1.1rem; }
+  .big { display:grid; grid-template-columns:repeat(3,1fr); gap:.5rem; margin:.9rem 0; }
+  .big div { background:var(--bg); border-radius:12px; padding:.5rem .6rem; text-align:center; }
+  .big b { display:block; font-size:1.35rem; line-height:1.2; color:var(--maroon); }
+  .big span { font-size:.85rem; color:var(--soft); }
+  .sun { background:var(--warn-bg); border-radius:12px; padding:.5rem .8rem; margin:.5rem 0; font-size:1rem; }
+  dl { margin:.6rem 0 0; }
+  .r { display:grid; grid-template-columns:7.2rem 1fr; gap:.6rem; padding:.45rem 0; border-top:1px solid var(--line); }
+  .r dt { font-weight:700; color:var(--soft); font-size:.95rem; text-transform:uppercase; letter-spacing:.03em; }
+  .r dd { margin:0; }
+  .r.opt dd { background:var(--warn-bg); border-radius:8px; padding:.1rem .5rem; }
+  .sleep { margin-top:.7rem; background:var(--ok-bg); border:1px solid var(--ok); border-radius:12px; padding:.6rem .8rem; }
+  .sleep span { font-weight:700; color:var(--ok); margin-right:.3rem; }
+  .tag { display:inline-block; font-size:.85rem; font-weight:700; padding:.05rem .5rem; border-radius:99px; background:var(--warn-bg); color:var(--warn); border:1px solid var(--warn); }
+  footer { margin:2rem 0 3rem; color:var(--soft); font-size:.95rem; }
+  @media (max-width:420px) { .r { grid-template-columns:1fr; gap:0; } .big b { font-size:1.1rem; } }
 </style>
 </head>
 <body>
-<header>
-  <div class="wrap">
-    <h1>Driver plan · 4–11 Oct 2026</h1>
-    <p>For Ganesh. Two guests: Alvin and Fanny. Sidhpur → Manali → Spiti → Gaggal.</p>
-  </div>
-</header>
-
+<header><div class="wrap"><h1>Driver plan · 4–11 Oct 2026</h1><p>4–11 Oct 2026 · 2 guests. Short and simple on purpose. Full plan:</p></div></header>
 <main class="wrap">
-
-  <div class="box ok">
-    <h3>Thank you, Ganesh 🙏</h3>
-    Please read this page. If a road is bad, or you think the plan is wrong, <b>you decide. Tell us.</b> Safe is better than fast.
-  </div>
-
-  <h2>Rules for every day</h2>
-  <div class="box">
-    <ul>
-      <li><b>No driving at night.</b> Be at the hotel before dark.</li>
-      <li><b>Go slow at high places.</b> Stop often. Guests may feel sick at 3,800 m or more.</li>
-      <li><b>Every evening:</b> check the road for tomorrow (snow, landslide, closed pass). Tell us your plan.</li>
-      <li><b>If a pass closes,</b> do not take a risk. We change the plan together.</li>
-      <li>Buy <b>water and fuel</b> in town. Fuel is hard to find after Keylong and in Spiti.</li>
-    </ul>
-  </div>
-
-  <h2>Permit — please read</h2>
-  <div class="box warn">
-    <h3>Spiti permit: Kaza SDM office, Wed 7 Oct</h3>
-    <ul>
-      <li>We go to the <b>SDM office in Kaza</b> on <b>Wed 7 Oct</b>. Sanjay said you will help. Thank you.</li>
-      <li><b>Fanny:</b> passport + visa (copies).</li>
-      <li><b>Alvin:</b> passport + <b>OCI card</b> (copies). He is OCI, not Indian citizen. Please tell the officer.</li>
-      <li>Carry <b>2 photos each</b> and the printed permit in the car.</li>
-      <li><b>Dhankar and Tabo are protected area.</b> On Thu 8 Oct, keep the permit in the car. Police may check.</li>
-      <li><b>Not protected:</b> Sissu, Keylong, Kunzum, Batal, Chandra Taal. No permit needed there.</li>
-      <li><b>Atal Tunnel:</b> no permit needed.</li>
-      <li><b>Losar barrier</b> (before Kunzum, both directions): fee <b>in cash</b>, about ₹200–300. Have cash ready. UPI often does not work.</li>
-      <li><b>e-Aagman</b> (Spiti entry registration): please check if it is needed for the car, and do it before Tue 6 Oct.</li>
-    </ul>
-  </div>
-
-  <h2>Pick a day</h2>
-  <nav class="days" aria-label="Days">
-    <a href="#d4"><b>Sun 4 Oct</b><span>Sidhpur → Manali</span></a>
-    <a href="#d5"><b>Mon 5 Oct</b><span>Manali → Koksar</span></a>
-    <a href="#d6"><b>Tue 6 Oct</b><span>Koksar → Kaza</span></a>
-    <a href="#d7"><b>Wed 7 Oct</b><span>Kaza villages</span></a>
-    <a href="#d8"><b>Thu 8 Oct</b><span>Dhankar + Tabo</span></a>
-    <a href="#d9"><b>Fri 9 Oct</b><span>Kaza → Chandra Taal → Koksar</span></a>
-    <a href="#d10"><b>Sat 10 Oct</b><span>Koksar → Palampur</span></a>
-    <a href="#d11"><b>Sun 11 Oct</b><span>Palampur → Gaggal airport</span></a>
-  </nav>
-
-  <!-- DAY 1 of car -->
-  <section class="day" id="d4">
-    <h2>Sun 4 Oct <small>Sidhpur (Dharamshala) → Manali</small></h2>
-    <div class="in">
-      <div class="big">
-        <div><b>06:30</b><span>Leave</span></div>
-        <div><b>~250 km</b><span>Distance</span></div>
-        <div><b>7–8 h</b><span>Drive time</span></div>
-      </div>
-      <p class="sun"><b>☀ Sunrise 06:19</b> (Sidhpur) · <b>🌙 Sunset 18:03</b> (Manali) · <b>Dark at 18:28</b>. Be at the hotel before dark.</p>
-      <h3>Pick up</h3>
-      <ul><li><b>Norling House, Norbulingka Institute, Sidhpur.</b> Be there at 06:15.</li></ul>
-      <h3>Route</h3>
-      <ul>
-        <li>Sidhpur → Kangra → Palampur → Mandi → Bajaura → Kullu → Manali.</li>
-        <li><span class="tag">Please</span> Between Bajaura and Mandi, take <b>Kandi Pass</b>. <b>Not NH21 via Aut.</b> Same distance, no Mandi town.</li>
-      </ul>
-      <h3>Stops</h3>
-      <ul>
-        <li>Breakfast is packed from Norling. Lunch on the road, one stop, 45 min.</li>
-        <li>Apple orchards along the Beas river in Kullu. Short photo stop is nice.</li>
-      </ul>
-      <h3>Arrive</h3>
-      <ul>
-        <li>About <b>14:00–15:30</b>.</li>
-        <li><b>Hotel: Banon Resorts, Old Manali.</b></li>
-        <li>Guests want to see <b>Hadimba Temple</b>. It closes at <b>18:00</b>. If we are late, we skip it.</li>
-      </ul>
-      <h3>Permit</h3>
-      <ul><li>No permit today.</li></ul>
-    </div>
-  </section>
-
-  <section class="day" id="d5">
-    <h2>Mon 5 Oct <small>Manali → Sissu / Koksar</small></h2>
-    <div class="in">
-      <div class="big">
-        <div><b>08:30</b><span>Leave</span></div>
-        <div><b>~60 km</b><span>Distance</span></div>
-        <div><b>2–3 h</b><span>Drive time</span></div>
-      </div>
-      <p class="sun"><b>☀ Sunrise 06:17</b> (Manali) · <b>🌙 Sunset 18:02</b> (Koksar) · <b>Dark at 18:26</b>. Be at the hotel before dark.</p>
-      <h3>Route</h3>
-      <ul>
-        <li>Manali → <b>Atal Tunnel</b> (9 km) → Sissu → Koksar.</li>
-        <li><b>Atal Tunnel, not Rohtang Pass.</b> Tunnel is faster and no permit.</li>
-        <li>Optional: <b>Vashisht hot springs</b>, 3 km from Manali, on the way. 45 min only if guests ask.</li>
-      </ul>
-      <h3>Stops</h3>
-      <ul>
-        <li>Sissu waterfall and small lake, if we have time.</li>
-        <li>This is a <b>slow day on purpose</b>. Guests rest to get used to the height (3,120 m).</li>
-        <li><b>Fill fuel in Manali.</b></li>
-      </ul>
-      <h3>Arrive</h3>
-      <ul><li>Afternoon. <b>Hotel: Moustache Koksar Luxuria.</b></li></ul>
-      <h3>Permit</h3>
-      <ul>
-        <li>No permit in Lahaul. We do <b>not</b> need to stop at Keylong office.</li>
-        <li><b>Tonight please check Kunzum Pass and the road to Kaza.</b> Tell us.</li>
-      </ul>
-    </div>
-  </section>
-
-  <section class="day" id="d6">
-    <h2>Tue 6 Oct <small>Koksar → Kunzum Pass → Kaza</small></h2>
-    <div class="in">
-      <div class="big">
-        <div><b>07:00</b><span>Leave</span></div>
-        <div><b>~140 km</b><span>Distance</span></div>
-        <div><b>6–7 h</b><span>Drive time</span></div>
-      </div>
-      <p class="sun"><b>☀ Sunrise 06:17</b> (Koksar) · <b>🌙 Sunset 17:57</b> (Kaza) · <b>Dark at 18:22</b>. Be at the hotel before dark.</p>
-      <h3>Route</h3>
-      <ul>
-        <li>Koksar → Gramphu → Batal (3,960 m) → <b>Kunzum Pass (4,590 m)</b> → Losar → Kaza.</li>
-        <li>Snow came early this year. <b>Check the pass before you leave.</b> If it is closed, call us. We use Plan B.</li>
-      </ul>
-      <h3>Stops</h3>
-      <ul>
-        <li><b>Kunzum Pass temple</b>: 15 min. Wind is strong and cold.</li>
-        <li><b>Losar barrier:</b> pay fee in cash, show passports.</li>
-        <li>Lunch: simple dhaba at Batal or Losar, if open. <b>Many dhabas are closing for winter.</b> Please carry snacks and water.</li>
-        <li><b>Fill fuel</b> in Keylong or Kaza. Check you have enough.</li>
-      </ul>
-      <h3>Arrive</h3>
-      <ul>
-        <li>Early afternoon. <b>Hotel: Amida Rangrik</b> (3–4 km from Kaza town).</li>
-        <li>Guests rest. Short walk only.</li>
-      </ul>
-      <h3>Permit</h3>
-      <ul><li>Today the permit is not ready yet. We get it tomorrow in Kaza. If Losar asks, say: "Permit tomorrow at Kaza SDM."</li></ul>
-    </div>
-  </section>
-
-  <section class="day" id="d7">
-    <h2>Wed 7 Oct <small>Kaza → Key, Kibber, Langza, Hikkim, Komic → Kaza</small></h2>
-    <div class="in">
-      <div class="big">
-        <div><b>09:00</b><span>Leave</span></div>
-        <div><b>~70 km</b><span>Distance</span></div>
-        <div><b>5–6 h</b><span>With stops</span></div>
-      </div>
-      <p class="sun"><b>☀ Sunrise 06:14</b> (Kaza) · <b>🌙 Sunset 17:56</b> (Kaza) · <b>Dark at 18:20</b>. Be at the hotel before dark.</p>
-      <h3>First</h3>
-      <ul>
-        <li><b>Go to the SDM office in Kaza first.</b> Get the permit for both guests. See "Permit" above.</li>
-      </ul>
-      <h3>Route (a loop, back to Kaza)</h3>
-      <ul>
-        <li><b>Key Monastery</b> → <b>Kibber</b> → <b>Chicham Bridge</b> → <b>Langza</b> → <b>Hikkim</b> (post office) → <b>Komic</b> → Kaza.</li>
-        <li>If time is short, skip Komic.</li>
-      </ul>
-      <h3>Stops</h3>
-      <ul>
-        <li>Hikkim: guests want to post a postcard. 20 min.</li>
-        <li>Lunch in Kaza or Langza.</li>
-      </ul>
-      <h3>Back</h3>
-      <ul><li>Back at Amida Rangrik before dark. Same hotel.</li></ul>
-    </div>
-  </section>
-
-  <section class="day" id="d8">
-    <h2>Thu 8 Oct <small>Kaza → Dhankar → Tabo → Kaza</small></h2>
-    <div class="in">
-      <div class="big">
-        <div><b>08:30</b><span>Leave</span></div>
-        <div><b>~110 km</b><span>Distance</span></div>
-        <div><b>5–6 h</b><span>With stops</span></div>
-      </div>
-      <p class="sun"><b>☀ Sunrise 06:15</b> (Kaza) · <b>🌙 Sunset 17:55</b> (Kaza) · <b>Dark at 18:19</b>. Be at the hotel before dark.</p>
-      <h3>Route</h3>
-      <ul>
-        <li>Kaza → <b>Dhankar</b> (fort and monastery) → <b>Tabo</b> (old monastery) → same road back to Kaza.</li>
-        <li><b>Do not go to Gue.</b> It is too far and past the checkpost.</li>
-      </ul>
-      <h3>Permit</h3>
-      <ul>
-        <li><span class="tag">Important</span> Dhankar and Tabo are <b>protected area</b>. Keep the permit and passports in the car.</li>
-      </ul>
-      <h3>Tonight — important</h3>
-      <ul>
-        <li><b>Check Kunzum and the road for tomorrow.</b></li>
-        <li><b>Order packed lunch</b> from the hotel for tomorrow.</li>
-        <li>Tomorrow is the longest day. Tell us if you want to leave earlier.</li>
-      </ul>
-    </div>
-  </section>
-
-  <section class="day" id="d9">
-    <h2>Fri 9 Oct <small>Kaza → Kunzum → Chandra Taal → Koksar</small></h2>
-    <div class="in">
-      <div class="big">
-        <div><b>06:30</b><span>Leave</span></div>
-        <div><b>~170 km</b><span>Distance</span></div>
-        <div><b>9–10 h</b><span>Long day</span></div>
-      </div>
-      <p class="sun"><b>☀ Sunrise 06:16</b> (Kaza) · <b>🌙 Sunset 17:57</b> (Koksar) · <b>Dark at 18:21</b>. Be at the hotel before dark.</p>
-      <p><span class="tag">Longest day</span> Start early. Do not be late.</p>
-      <h3>Route</h3>
-      <ul>
-        <li>Kaza → Losar → <b>Kunzum Pass</b> → <b>Batal</b> → the side road to <b>Chandra Taal lake</b> → back to Batal → Chatru → Gramphu → Koksar.</li>
-        <li>Guests want 2 hours at the lake. They may walk around it.</li>
-        <li><b>Chandra Taal road is the risk.</b> Snow or mud? <b>You decide.</b> If the road is not safe, skip the lake. We understand.</li>
-        <li>Camps at the lake close about 10 Oct. Dhaba at Batal runs to about 15 Oct.</li>
-      </ul>
-      <h3>Stops</h3>
-      <ul>
-        <li><b>Packed lunch from Kaza.</b> Water and snacks.</li>
-        <li>Losar barrier again: cash fee.</li>
-        <li>Try to leave the lake by 15:00. We must reach Koksar before dark.</li>
-      </ul>
-      <h3>Arrive</h3>
-      <ul><li><b>Hotel: Moustache Koksar Luxuria</b> (same as Monday).</li></ul>
-    </div>
-  </section>
-
-  <section class="day" id="d10">
-    <h2>Sat 10 Oct <small>Koksar → Manali → Palampur</small></h2>
-    <div class="in">
-      <div class="big">
-        <div><b>06:00</b><span>Leave</span></div>
-        <div><b>~250 km</b><span>Distance</span></div>
-        <div><b>7–9 h</b><span>Drive time</span></div>
-      </div>
-      <p class="sun"><b>☀ Sunrise 06:20</b> (Koksar) · <b>🌙 Sunset 17:58</b> (Palampur) · <b>Dark at 18:23</b>. Be at the hotel before dark.</p>
-      <h3>Route</h3>
-      <ul>
-        <li>Koksar → Atal Tunnel → Manali → Kullu → Mandi → Jogindernagar → Baijnath → Palampur.</li>
-        <li>Use <b>Kandi Pass</b> again if you think it is better (Bajaura–Mandi).</li>
-      </ul>
-      <h3>Stops</h3>
-      <ul>
-        <li><b>Breakfast in Manali</b> about 08:30. Do not stay long.</li>
-        <li>Lunch near Mandi.</li>
-      </ul>
-      <h3>Arrive</h3>
-      <ul>
-        <li>Late afternoon. <b>Hotel: Taragarh Palace</b> (Baijnath side of Palampur).</li>
-        <li>Tomorrow is early. Guests will sleep early.</li>
-      </ul>
-      <h3>Permit</h3>
-      <ul><li>No permit.</li></ul>
-    </div>
-  </section>
-
-  <section class="day" id="d11">
-    <h2>Sun 11 Oct <small>Palampur → Gaggal airport (last day)</small></h2>
-    <div class="in">
-      <div class="big">
-        <div><b>06:15</b><span>Leave</span></div>
-        <div><b>~50 km</b><span>Distance</span></div>
-        <div><b>1–1.5 h</b><span>Drive time</span></div>
-      </div>
-      <p class="sun"><b>☀ Sunrise 06:23</b> (Palampur) · <b>🌙 Sunset 17:57</b> (Delhi) · <b>Dark at 18:21</b>. Be at the hotel before dark.</p>
-      <p><span class="tag">Flight 09:20</span> We must be at the airport at <b>07:45</b>.</p>
-      <h3>Route</h3>
-      <ul>
-        <li>Taragarh Palace → Palampur → Kangra → <b>Gaggal airport (DHM)</b>.</li>
-        <li>Leave on time. Do not stop on the way.</li>
-      </ul>
-      <h3>After</h3>
-      <ul>
-        <li>This is the last day of the car. Thank you, Ganesh and Sanjay. 🙏</li>
-      </ul>
-    </div>
-  </section>
-
-  <h2>Documents in the car</h2>
-  <div class="box">
-    <ul>
-      <li>Permit (printed) + passport and visa / OCI copies for both guests</li>
-      <li>Cash for Losar barrier</li>
-      <li>Car papers, driving licence</li>
-    </ul>
-  </div>
-
-  <footer>
-    Distances and times are estimates. Roads in the mountains change. If you see a problem, tell Alvin or Fanny on WhatsApp. Plan made 4 Oct 2026.
-  </footer>
+  <h2 class="sec">All days</h2>
+  <nav class="days" aria-label="Days"><a href="#d1"><b>Sun 4 Oct</b><span>Sidhpur → Manali<br><i>Leave <b>06:30</b></i></span></a><a href="#d2"><b>Mon 5 Oct</b><span>Manali → Koksar<br><i>Leave <b>08:30</b></i></span></a><a href="#d3"><b>Tue 6 Oct</b><span>Koksar → Kaza<br><i>Leave <b>07:00</b></i></span></a><a href="#d4"><b>Wed 7 Oct</b><span>Kaza → villages → Kaza<br><i>Leave <b>09:00</b></i></span></a><a href="#d5"><b>Thu 8 Oct</b><span>Kaza → Dhankar → Tabo → Kaza<br><i>Leave <b>08:30</b></i></span></a><a href="#d6"><b>Fri 9 Oct</b><span>Kaza → Chandra Taal → Koksar<br><i>Leave <b>06:30</b></i></span></a><a href="#d7"><b>Sat 10 Oct</b><span>Koksar → Palampur<br><i>Leave <b>06:00</b></i></span></a><a href="#d8"><b>Sun 11 Oct</b><span>Palampur → Gaggal airport<br><i>Leave <b>06:15</b></i></span></a></nav><p class="note">Km and times are estimates. Add 1–2 hours for landslide, roadwork or army convoy.</p>
+  <h2 class="sec">Hotels</h2>
+  <div class="hotels"><div class="hotel"><div class="hn"><b>Norling House</b> (pick up)</div><div class="hw">📍 Norbulingka Institute, <b>Sidhpur</b></div><div class="hd">🛏 Sat 3 → Sun 4</div><div class="ht">Guests ready 06:15. Breakfast packed.</div></div><div class="hotel"><div class="hn"><b>Banon Resorts</b></div><div class="hw">📍 <b>Old Manali</b> (not Mall Road)</div><div class="hd">🛏 Sun 4</div><div class="ht">Old family hotel in orchards and deodar trees. Breakfast included.</div></div><div class="hotel"><div class="hn"><b>Moustache Koksar Luxuria</b></div><div class="hw">📍 <b>Koksar</b>, before Sissu, about 14 km from Sissu</div><div class="hd">🛏 Mon 5</div><div class="ht">New (2024). Cottages with heater.</div></div><div class="hotel"><div class="hn"><b>Amida Rangrik</b></div><div class="hw">📍 <b>Rangrik</b>, 3–4 km from Kaza town</div><div class="hd">🛏 Tue 6, Wed 7, Thu 8</div><div class="ht">10 cottages, view of Key Monastery. Floor heating. Breakfast + dinner included.</div></div><div class="hotel"><div class="hn"><b>Moustache Koksar Luxuria</b></div><div class="hw">📍 <b>Koksar</b></div><div class="hd">🛏 Fri 9</div><div class="ht">Same hotel as Monday.</div></div><div class="hotel"><div class="hn"><b>WelcomHeritage Taragarh Palace</b></div><div class="hw">📍 <b>Baijnath side</b> of Palampur, about 50 km from Gaggal</div><div class="hd">🛏 Sat 10</div><div class="ht">Old palace in a forest estate. Big gate, long road in.</div></div></div><p class="note">Search the hotel name on Google Maps. Phone numbers: ask Alvin or Fanny.</p><p class="note">---</p>
+  <section class="day" id="d1"><h2>Sun 4 Oct <small>Sidhpur → Manali</small></h2><div class="in"><div class="big"><div><b>06:30</b><span>Leave</span></div><div><b>~250 km</b><span>Distance</span></div><div><b>7–8 h</b><span>Drive time</span></div></div><p class="sun">🌅 Sunrise 06:19 · 🌇 Sunset 18:03 · dark by 18:28</p><dl><div class="r"><dt>Leave</dt><dd><b>06:30</b> from Norling House, Norbulingka, Sidhpur (be there 06:15)</dd></div><div class="r "><dt>Arrive</dt><dd>14:00–15:30</dd></div><div class="r "><dt>Route</dt><dd>Kangra → Palampur → Mandi → Bajaura → Kullu → Manali</dd></div><div class="r "><dt>Stops</dt><dd>Breakfast packed. One lunch stop, 45 min. Apple orchards in Kullu (photo stop)</dd></div><div class="r opt"><dt>Option</dt><dd>Hadimba Temple closes <b>18:00</b>. If late, skip</dd></div></dl><div class="sleep"><span>🛏 Sleep</span> <b>Banon Resorts, Old Manali</b></div></div></section><section class="day" id="d2"><h2>Mon 5 Oct <small>Manali → Koksar</small></h2><div class="in"><div class="big"><div><b>08:30</b><span>Leave</span></div><div><b>~60 km</b><span>Distance</span></div><div><b>2–3 h</b><span>Drive time</span></div></div><p class="sun">🌅 Sunrise 06:17 · 🌇 Sunset 18:02 · dark by 18:26</p><dl><div class="r"><dt>Leave</dt><dd><b>08:30</b> from Banon Resorts. Fill fuel in Manali</dd></div><div class="r "><dt>Arrive</dt><dd>Afternoon</dd></div><div class="r "><dt>Route</dt><dd>Manali → <b>Atal Tunnel</b> (9 km) → Sissu → Koksar. <b>Not Rohtang Pass</b></dd></div><div class="r "><dt>Stops</dt><dd>Sissu waterfall and lake, if time</dd></div><div class="r opt"><dt>Option</dt><dd>Vashisht hot springs, 3 km from Manali, 45 min. Only if guests ask</dd></div><div class="r "><dt>Note</dt><dd>Slow day on purpose (3,120 m). No stop at Keylong</dd></div><div class="r "><dt>Tonight</dt><dd>Check Kunzum and Kaza road. Tell guests</dd></div></dl><div class="sleep"><span>🛏 Sleep</span> <b>Moustache Koksar Luxuria, Koksar</b></div></div></section><section class="day" id="d3"><h2>Tue 6 Oct <small>Koksar → Kaza</small></h2><div class="in"><div class="big"><div><b>07:00</b><span>Leave</span></div><div><b>~140 km</b><span>Distance</span></div><div><b>6–7 h</b><span>Drive time</span></div></div><p class="sun">🌅 Sunrise 06:17 · 🌇 Sunset 17:57 · dark by 18:22</p><dl><div class="r"><dt>Leave</dt><dd><b>07:00</b> from Koksar. Check Kunzum before you leave</dd></div><div class="r "><dt>Arrive</dt><dd>Early afternoon</dd></div><div class="r "><dt>Route</dt><dd>Koksar → Gramphu → Batal → <b>Kunzum Pass (4,590 m)</b> → Losar → Kaza</dd></div><div class="r "><dt>Stops</dt><dd>Kunzum temple, 15 min · Losar barrier (cash fee, passports)</dd></div><div class="r "><dt>Food</dt><dd>Dhabas are closing for winter. Carry water and snacks</dd></div><div class="r opt"><dt>If closed</dt><dd>Kunzum closed? Stop. Call guests. Plan B</dd></div></dl><div class="sleep"><span>🛏 Sleep</span> <b>Amida Rangrik, Rangrik</b> (3–4 km from Kaza town)</div></div></section><section class="day" id="d4"><h2>Wed 7 Oct <small>Kaza villages</small></h2><div class="in"><div class="big"><div><b>09:00</b><span>Leave</span></div><div><b>~70 km loop</b><span>Distance</span></div><div><b>5–6 h with stops</b><span>Drive time</span></div></div><p class="sun">🌅 Sunrise 06:14 · 🌇 Sunset 17:56 · dark by 18:20</p><dl><div class="r"><dt>Leave</dt><dd><b>09:00</b> from Amida Rangrik</dd></div><div class="r "><dt>Route</dt><dd>Kaza → Key Monastery → Kibber → Chicham Bridge → Langza → Hikkim → Komic → Kaza</dd></div><div class="r "><dt>Stops</dt><dd>Hikkim post office, 20 min. Lunch in Kaza or Langza</dd></div><div class="r opt"><dt>Option</dt><dd>Short on time? Skip Komic</dd></div><div class="r "><dt>Back</dt><dd>Before dark</dd></div></dl><div class="sleep"><span>🛏 Sleep</span> <b>Amida Rangrik</b> (same hotel)</div></div></section><section class="day" id="d5"><h2>Thu 8 Oct <small>Dhankar and Tabo</small></h2><div class="in"><div class="big"><div><b>08:30</b><span>Leave</span></div><div><b>~110 km</b><span>Distance</span></div><div><b>5–6 h with stops</b><span>Drive time</span></div></div><p class="sun">🌅 Sunrise 06:15 · 🌇 Sunset 17:55 · dark by 18:19</p><dl><div class="r"><dt>Leave</dt><dd><b>08:30</b> from Amida Rangrik</dd></div><div class="r "><dt>Route</dt><dd>Kaza → Dhankar (fort, monastery) → Tabo (old monastery) → same road back to Kaza</dd></div><div class="r opt"><dt>Option</dt><dd><b>Do not go to Gue.</b> Too far</dd></div><div class="r "><dt>Tonight</dt><dd>Check Kunzum for tomorrow. <b>Order packed lunch</b> from the hotel</dd></div></dl><div class="sleep"><span>🛏 Sleep</span> <b>Amida Rangrik</b> (same hotel)</div></div></section><section class="day" id="d6"><h2>Fri 9 Oct <small>Kaza → Chandra Taal → Koksar</small></h2><div class="in"><div class="big"><div><b>06:30</b><span>Leave</span></div><div><b>~170 km</b><span>Distance</span></div><div><b>9–10 h</b><span>Drive time</span></div></div><span class="tag">Longest day</span><p class="sun">🌅 Sunrise 06:16 · 🌇 Sunset 17:57 · dark by 18:21</p><dl><div class="r"><dt>Leave</dt><dd><b>06:30</b> from Amida Rangrik. Do not be late</dd></div><div class="r "><dt>Arrive</dt><dd>Before dark</dd></div><div class="r "><dt>Route</dt><dd>Kaza → Losar → Kunzum → Batal → side road to <b>Chandra Taal</b> → Batal → Chatru → Gramphu → Koksar</dd></div><div class="r "><dt>Stops</dt><dd>Chandra Taal: guests want ~2 h. <b>Leave the lake by 15:00</b>. Packed lunch from Kaza. Losar barrier (cash)</dd></div><div class="r opt"><dt>Option</dt><dd>Lake road has snow or mud? Your decision. Skip the lake if not safe</dd></div></dl><div class="sleep"><span>🛏 Sleep</span> <b>Moustache Koksar Luxuria, Koksar</b> (same as Monday)</div></div></section><section class="day" id="d7"><h2>Sat 10 Oct <small>Koksar → Palampur</small></h2><div class="in"><div class="big"><div><b>06:00</b><span>Leave</span></div><div><b>~250 km</b><span>Distance</span></div><div><b>7–9 h</b><span>Drive time</span></div></div><p class="sun">🌅 Sunrise 06:20 · 🌇 Sunset 17:58 · dark by 18:23</p><dl><div class="r"><dt>Leave</dt><dd><b>06:00</b> from Koksar</dd></div><div class="r "><dt>Arrive</dt><dd>Late afternoon</dd></div><div class="r "><dt>Route</dt><dd>Koksar → Atal Tunnel → Manali → Kullu → Mandi → Jogindernagar → Baijnath → Palampur</dd></div><div class="r "><dt>Stops</dt><dd>Breakfast in Manali ~08:30, short. Lunch near Mandi</dd></div><div class="r opt"><dt>Option</dt><dd>Kandi Pass again (Bajaura–Mandi), if you think it is better</dd></div></dl><div class="sleep"><span>🛏 Sleep</span> <b>WelcomHeritage Taragarh Palace</b>, Baijnath side of Palampur</div></div></section><section class="day" id="d8"><h2>Sun 11 Oct <small>Palampur → Gaggal airport</small></h2><div class="in"><div class="big"><div><b>06:15</b><span>Leave</span></div><div><b>~50 km</b><span>Distance</span></div><div><b>1–1.5 h</b><span>Drive time</span></div></div><p class="sun">🌅 Sunrise 06:23 · 🌇 Sunset 17:57</p><dl><div class="r"><dt>Leave</dt><dd><b>06:15</b> from Taragarh Palace</dd></div><div class="r "><dt>Arrive</dt><dd>Gaggal airport (DHM) by <b>07:45</b>. Flight is 09:20</dd></div><div class="r "><dt>Route</dt><dd>Palampur → Kangra → Gaggal airport. Do not stop</dd></div></dl></div></section>
+  <footer>Distances and times are estimates. Mountain roads change. If there is a problem, message Alvin or Fanny on WhatsApp. Plan updated 4 Oct 2026.</footer>
 </main>
 </body>
 </html>
