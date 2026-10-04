@@ -78,6 +78,21 @@ window.TRIP = {
     ],
   },
 
+  // Sunrise at the day's start place, sunset at its end place (IST). See itinerary.md § Sunrise & sunset.
+  sun: {
+    1: { a: "Gaggal", b: "Sidhpur", rise: "06:18", set: "18:09", dark: "18:34", light: "11h 51m" },
+    2: { a: "Sidhpur", b: "Sidhpur", rise: "06:19", set: "18:08", dark: "18:32", light: "11h 49m" },
+    3: { a: "Sidhpur", b: "Manali", rise: "06:19", set: "18:03", dark: "18:28", light: "11h 44m" },
+    4: { a: "Manali", b: "Koksar", rise: "06:17", set: "18:02", dark: "18:26", light: "11h 45m" },
+    5: { a: "Koksar", b: "Kaza", rise: "06:17", set: "17:57", dark: "18:22", light: "11h 40m" },
+    6: { a: "Kaza", b: "Kaza", rise: "06:14", set: "17:56", dark: "18:20", light: "11h 42m" },
+    7: { a: "Kaza", b: "Kaza", rise: "06:15", set: "17:55", dark: "18:19", light: "11h 40m" },
+    8: { a: "Kaza", b: "Koksar", rise: "06:16", set: "17:57", dark: "18:21", light: "11h 41m" },
+    9: { a: "Koksar", b: "Palampur", rise: "06:20", set: "17:58", dark: "18:23", light: "11h 38m" },
+    10: { a: "Palampur", b: "Delhi", rise: "06:23", set: "17:57", dark: "18:21", light: "11h 34m" },
+    11: { a: "Delhi", b: "Delhi", rise: "06:19", set: "17:56", dark: "18:20", light: "11h 37m" },
+  },
+
   // Which photo illustrates which day (falls back to the prayer flags).
   dayImages: { 1: "norbulingka", 2: "kangra", 3: "manali", 4: "sissu", 5: "kunzum", 6: "key", 7: "dhankar", 8: "chandrataal", 9: "palampur", 10: "delhi", 11: "flags" },
 };

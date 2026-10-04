@@ -145,6 +145,36 @@ function renderMarkdown(md, { dropH1 = true, sectioned = false, openFirst = 2 } 
   return box;
 }
 
+/* ---------- sunrise & sunset: a daylight strip for each day (times from config.js, IST) ---------- */
+const toMin = (t) => { const [h, m] = t.split(":").map(Number); return h * 60 + m; };
+function sunVisual(n, { compact = false } = {}) {
+  const v = cfg.sun?.[n];
+  if (!v) return "";
+  const W = 320, H = 78, x0 = 10, x1 = 310, t0 = 5 * 60, t1 = 19.5 * 60, hz = 58;
+  const X = (t) => +(x0 + ((toMin(t) - t0) / (t1 - t0)) * (x1 - x0)).toFixed(1);
+  const xr = X(v.rise), xs = X(v.set), xd = X(v.dark), xg = +(xs - (60 / (t1 - t0)) * (x1 - x0)).toFixed(1);
+  const mid = +((xr + xs) / 2).toFixed(1), top = 14;
+  const same = v.a === v.b;
+  const svg = `<svg class="sunsvg" viewBox="0 0 ${W} ${H}" role="img" aria-label="Sunrise ${v.rise} at ${esc(v.a)}, sunset ${v.set} at ${esc(v.b)}, dark by ${v.dark}">
+    <defs><linearGradient id="sk${n}${compact ? "c" : ""}" x1="0" x2="1"><stop offset="0" stop-color="#f6c36b"/><stop offset=".18" stop-color="#bfe0f2"/><stop offset=".78" stop-color="#bfe0f2"/><stop offset="1" stop-color="#f08a4b"/></linearGradient></defs>
+    <rect x="${x0}" y="6" width="${x1 - x0}" height="${hz - 6}" rx="10" fill="#1e2a55"/>
+    <path d="M${xr} ${hz} Q${mid} ${-top} ${xs} ${hz}Z" fill="url(#sk${n}${compact ? "c" : ""})"/>
+    <rect x="${xg}" y="${hz - 12}" width="${xs - xg}" height="12" fill="#f39a1e" opacity=".35"/>
+    <path d="M${xr} ${hz} Q${mid} ${-top} ${xs} ${hz}" fill="none" stroke="#f39a1e" stroke-width="2.5" stroke-dasharray="1 5" stroke-linecap="round"/>
+    <line x1="${x0}" x2="${x1}" y1="${hz}" y2="${hz}" stroke="#f1e6c8" stroke-width="2"/>
+    <circle cx="${mid}" cy="${+(hz / 2 - top / 2).toFixed(1)}" r="9" fill="#f39a1e"/>
+    <circle cx="${xr}" cy="${hz}" r="5" fill="#fff" stroke="#c2394a" stroke-width="2.5"/>
+    <circle cx="${xs}" cy="${hz}" r="5" fill="#fff" stroke="#c2394a" stroke-width="2.5"/>
+    <line x1="${xd}" x2="${xd}" y1="${hz - 14}" y2="${hz + 6}" stroke="#f1e6c8" stroke-width="2"/>
+  </svg>`;
+  return `<figure class="sun ${compact ? "compact" : ""}">${compact ? "" : svg}
+    <figcaption>
+      <span class="s-up"><b>↑ ${v.rise}</b><small>sunrise${same ? "" : " · " + esc(v.a)}</small></span>
+      <span class="s-mid"><b>${v.light}</b><small>of light · dark by ${v.dark}</small></span>
+      <span class="s-dn"><b>↓ ${v.set}</b><small>sunset${same ? "" : " · " + esc(v.b)}</small></span>
+    </figcaption></figure>`;
+}
+
 const sections = (md) => {
   const out = {};
   md.split(/^## /m).slice(1).forEach((s) => { const nl = s.indexOf("\n"); out[s.slice(0, nl).trim()] = s.slice(nl + 1); });
@@ -167,7 +197,7 @@ function parseDays(md) {
     const head = m[2];
     const after = md.slice(m.index + m[0].length);
     const end = after.search(/^#{2,3}\s/m);
-    const body = (end < 0 ? after : after.slice(0, end)).trim();
+    const body = (end < 0 ? after : after.slice(0, end)).replace(/^\s*🌅[^\n]*\n/, "").trim();
     const dm = head.match(/^([A-Za-z]{3})\s+(\d+)\s+([A-Za-z]{3})/);
     const alt = head.match(/\(([\d,]+)\s*m\)/);
     const place = head.replace(/^[^·]*·\s*/, "").replace(/\([\d,]+\s*m\)/, "").replace(/\s*—.*$/, "").replace(/[★*]/g, "").trim();
@@ -413,6 +443,7 @@ function initTripMap(days) {
         <p class="ov-when">Day ${d.n} · ${esc([d.dow, d.d, d.mon].filter(Boolean).join(" "))}</p>
         <h3>${esc(d.place)}${d.star ? ' <span class="star">★</span>' : ""}</h3>
         ${d.alt ? `<p class="ov-alt">⛰️ ${d.alt.toLocaleString()} m</p>` : ""}
+        ${sunVisual(d.n)}
         ${d.lead ? `<p class="ov-lead">${esc(d.lead)}</p>` : ""}
         ${d.bullets?.length ? `<ul>${d.bullets.map((b) => `<li>${esc(b)}</li>`).join("")}</ul>` : ""}
         <div class="ov-nav">
@@ -574,6 +605,7 @@ async function homeView() {
         return `<li id="day-${d.n}"><a class="day" href="#/c/itinerary?day=${d.n}">
           <span class="arch"><img src="img/${key}.jpg" alt="" loading="lazy" decoding="async"><span class="stamp">${d.n}</span>${d.alt ? `<span class="alt-chip">${d.alt.toLocaleString()} m</span>` : ""}</span>
           <span class="day-body"><span class="day-when">${esc([d.dow, d.d, d.mon].filter(Boolean).join(" "))}</span>
+          ${cfg.sun?.[d.n] ? `<span class="day-sun" title="Sunrise and sunset">↑ ${cfg.sun[d.n].rise} · ↓ ${cfg.sun[d.n].set}</span>` : ""}
           <strong>${esc(d.place)}${d.star ? ' <span class="star" title="Key day">★</span>' : ""}</strong>
           ${d.blurb ? `<span class="day-blurb">${esc(d.blurb)}</span>` : ""}</span></a></li>`;
       }).join("")}</ol>`;
@@ -659,6 +691,7 @@ async function chapterView(id, query) {
       </aside>
       <article id="doc"><button class="linkbtn" id="expand" type="button">Open all sections</button></article>
     </div>`;
+  if (ch.id === "itinerary") sunInject(prose);
   $("#doc").append(prose);
   let all = false;
   $("#expand").onclick = (e) => { all = !all; $$(".sect", prose).forEach((d) => (d.open = all)); e.target.textContent = all ? "Close all sections" : "Open all sections"; };
@@ -679,6 +712,17 @@ async function chapterView(id, query) {
   if (q.get("day")) target = heads.find((h) => new RegExp(`^Day ${q.get("day")}\\b`).test(h.textContent.trim()));
   if (q.get("h")) target = document.getElementById(q.get("h"));
   if (target) { openAncestors(target); requestAnimationFrame(() => target.scrollIntoView({ block: "start" })); } else scrollTo(0, 0);
+}
+
+function sunInject(prose) {
+  $$("h3", prose).forEach((h) => {
+    const m = h.textContent.trim().match(/^Day (\d+)\b/);
+    if (!m || !cfg.sun?.[m[1]]) return;
+    const body = h.closest("summary")?.nextElementSibling || h.parentElement;
+    const first = [...body.children].find((k) => k.tagName === "P" && k.textContent.trim().startsWith("🌅"));
+    const holder = document.createElement("div"); holder.innerHTML = sunVisual(+m[1]);
+    if (first) first.replaceWith(holder.firstElementChild); else if (h.closest("summary")) body.prepend(holder.firstElementChild); else h.after(holder.firstElementChild);
+  });
 }
 
 function tocSpy(heads) {
